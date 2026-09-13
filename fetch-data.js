@@ -2,7 +2,7 @@ const fs = require('fs');
 
 const URL_INDEX = "https://script.google.com/macros/s/AKfycbzDpLJ0f6uCpHARY2pU8EZt5UDO1Bk3LOa_ZG-3llN_TYzrnjWj4AMA7ZZdz8i1pwlk/exec";
 const URL_PRESENTER = "https://script.google.com/macros/s/AKfycby4fAi7297I9fgBIsC1QagPWR8Gmu0b4A9R2Xnljl9j5tVD6vSg7N1N8Cx6ph5yhpzB/exec";
-const URL_CKSS27 = "https://script.google.com/macros/s/AKfycbw8iAeQXNzFSYJC4DqMVWEScFQUWuxP2KRot-bXRYwI_6yjdFhVSPI98G_eG-LKS2_9/exec";
+const URL_CKSS27 = "https://script.google.com/macros/s/AKfycbybRi3xvyB1fHl0YYBHo-Hp9UhXUMlXl_tpbKJ14L3qzJSQ1Dr99jime8nAdOT7T-ycew/exec";
 
 async function fetchAndSave(url, fileName) {
   try {
