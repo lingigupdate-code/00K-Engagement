@@ -1,0 +1,36 @@
+const fs = require('fs');
+
+// ลิงก์ Web App API จาก Google Apps Script (แยกตามชีตหรือดึงรวม)
+const URL_INDEX = "https://script.google.com/macros/s/AKfycbzDpLJ0f6uCpHARY2pU8EZt5UDO1Bk3LOa_ZG-3llN_TYzrnjWj4AMA7ZZdz8i1pwlk/exec";
+const URL_PRESENTER = "https://script.google.com/macros/s/AKfycby4fAi7297I9fgBIsC1QagPWR8Gmu0b4A9R2Xnljl9j5tVD6vSg7N1N8Cx6ph5yhpzB/exec";
+const URL_CKSS27 = "https://script.google.com/macros/s/AKfycbw8iAeQXNzFSYJC4DqMVWEScFQUWuxP2KRot-bXRYwI_6yjdFhVSPI98G_eG-LKS2_9/exec";
+
+async function updateAllData() {
+  try {
+    console.log("Fetching data for all pages...");
+
+    // ยิงดึงข้อมูลพร้อมกันทั้ง 3 หน้า
+    const [resIndex, resPresenter, resCkss27] = await Promise.all([
+      fetch(URL_INDEX),
+      fetch(URL_PRESENTER),
+      fetch(URL_CKSS27)
+    ]);
+
+    const dataIndex = await resIndex.json();
+    const dataPresenter = await resPresenter.json();
+    const dataCkss27 = await resCkss27.json();
+
+    // เขียนแยกเป็น 3 ไฟล์
+    fs.writeFileSync('data-index.json', JSON.stringify(dataIndex, null, 2));
+    fs.writeFileSync('data-presenter.json', JSON.stringify(dataPresenter, null, 2));
+    fs.writeFileSync('data-ckss27.json', JSON.stringify(dataCkss27, null, 2));
+
+    console.log("All JSON files updated successfully!");
+
+  } catch (error) {
+    console.error("Error updating data:", error);
+    process.exit(1);
+  }
+}
+
+updateAllData();

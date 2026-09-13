@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>00K Business Cards | Lingling Kwong</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- เชื่อมโยงไฟล์ CSS สำหรับตกแต่ง -->
+    <link rel="stylesheet" href="css/presenter.css">
+</head>
+<body>
+
+    <div class="fixed-background"></div>
+
+    <div class="header-section">
+        <div class="subtitle">Official Brand Portfolio</div>
+        <h1>Lingling Kwong</h1>
+    </div>
+
+    <!-- ปุ่มเปิดหน้าอินโฟกราฟิก -->
+    <button class="infographic-trigger-btn" onclick="openInfographicModal()">View Infographic</button>
+
+    <!-- Modal หน้าอินโฟกราฟิก -->
+    <div id="infographic-modal">
+        <div class="modal-content-wrapper">
+            <!-- ปุ่ม Save และ Close ลอยอยู่ด้านนอกมุมบนขวา -->
+            <div class="modal-floating-actions">
+                <button class="save-img-btn" onclick="saveAsImage()">Save</button>
+                <button class="close-modal-btn" onclick="closeInfographicModal()">&times;</button>
+            </div>
+
+            <div class="ig-infographic-box" id="capture-area">
+                <img src="image/infographic-bg.jpg" class="bg-image-layer" alt="Background">
+                <div class="bg-fade-overlay"></div>
+                
+                <div class="ref-header">
+                    <div class="ref-header-content">
+                        <div class="ref-title">Lingling<br>Kwong</div>
+                        <div class="ref-badge">Brand Endorser 2026</div>
+                    </div>
+                </div>
+
+                <!-- วันที่และเส้นแบ่งทอง จัดชิดซ้าย -->
+                <div style="margin-top: 6px; width: 100%;">
+                    <div class="infographic-date-container">
+                        <div class="infographic-date" id="current-date-display"></div>
+                    </div>
+                </div>
+
+                <div class="ref-rows-container">
+                    <!-- 3 ตำแหน่งแรก ใส่คลาส short-line เพื่อให้เส้นขีดสีทองยาวครึ่งเดียว -->
+                    <div class="ref-row-card short-line">
+                        <div class="ref-row-title">Global Brand Ambassador</div>
+                        <div id="row-global-brand-ambassador" class="ref-row-chips"></div>
+                    </div>
+                    <div class="ref-row-card short-line">
+                        <div class="ref-row-title">Face Of APAC</div>
+                        <div id="row-face-of-apac" class="ref-row-chips"></div>
+                    </div>
+                    <div class="ref-row-card short-line">
+                        <div class="ref-row-title">ASEAN Regional Presenter</div>
+                        <div id="row-asean-regional-presenter" class="ref-row-chips"></div>
+                    </div>
+                    
+                    <!-- ตำแหน่งที่เหลือใช้เส้นขีดความยาวเต็มปกติ -->
+                    <div class="ref-row-card">
+                        <div class="ref-row-title">Brand Spokesperson</div>
+                        <div id="row-brand-spokesperson" class="ref-row-chips"></div>
+                    </div>
+                    <div class="ref-row-card">
+                        <div class="ref-row-title">Brand Ambassador</div>
+                        <div id="row-brand-ambassador" class="ref-row-chips"></div>
+                    </div>
+                    <div class="ref-row-card">
+                        <div class="ref-row-title">Friend Of Brand</div>
+                        <div id="row-friend-of-brand" class="ref-row-chips"></div>
+                    </div>
+                    <div class="ref-row-card">
+                        <div class="ref-row-title">Presenter</div>
+                        <div id="row-presenter" class="ref-row-chips"></div>
+                    </div>
+                </div>
+
+                <div class="ref-footer">
+                    Featuring only brands with official titles. (Excludes expired contracts)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading" class="spinner-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Fetching Portfolio</div>
+    </div>
+
+    <!-- หน้าหลัก แสดงผลทุกหมวดหมู่ปกติ -->
+    <div id="section-brand-owner" class="category-section">
+        <div class="category-title">Brand Owner</div>
+        <div id="grid-brand-owner" class="presenter-grid"></div>
+    </div>
+
+    <div id="section-global-brand-ambassador" class="category-section">
+        <div class="category-title">Global Brand Ambassador</div>
+        <div id="grid-global-brand-ambassador" class="presenter-grid"></div>
+    </div>
+
+    <div id="section-face-of-apac" class="category-section">
+        <div class="category-title">Face Of APAC</div>
+        <div id="grid-face-of-apac" class="presenter-grid"></div>
+    </div>
+
+    <div id="section-asean-regional-presenter" class="category-section">
+        <div class="category-title">ASEAN Regional Presenter</div>
+        <div id="grid-asean-regional-presenter" class="presenter-grid"></div>
+    </div>
+
+    <div id="section-brand-spokesperson" class="category-section">
+        <div class="category-title">Brand Spokesperson</div>
+        <div id="grid-brand-spokesperson" class="presenter-grid"></div>
+    </div>
+
+    <div id="section-brand-ambassador" class="category-section">
+        <div class="category-title">Brand Ambassador</div>
+        <div id="grid-brand-ambassador" class="presenter-grid"></div>
+    </div>
+
+    <div id="section-friend-of-brand" class="category-section">
+        <div class="category-title">Friend Of Brand</div>
+        <div id="grid-friend-of-brand" class="presenter-grid"></div>
+    </div>
+
+    <div id="section-presenter" class="category-section">
+        <div class="category-title">Presenter</div>
+        <div id="grid-presenter" class="presenter-grid"></div>
+    </div>
+
+    <div id="section-expired-contact" class="category-section">
+        <div class="category-title">Past Collaborations / Expired</div>
+        <div id="grid-expired-contact" class="presenter-grid"></div>
+    </div>
+
+    <button class="back-btn" onclick="window.location.href='index.html'">Return to Home</button>
+
+    <!-- เชื่อมโยงไฟล์สคริปต์ของหน้านี้เพียงไฟล์เดียว -->
+    <script src="js/presenter-script.js" defer></script>
+</body>
+</html>

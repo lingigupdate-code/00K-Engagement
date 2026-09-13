@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>00K Engagement - Calvin Klein x NYFW</title>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7E7RP7E17Y"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-7E7RP7E17Y');
+    </script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- เชื่อมโยงไฟล์ CSS ภายนอก -->
+    <link rel="stylesheet" href="css/ckss27.css">
+    
+    <!-- ไฟล์ข้อมูลแคปชันสุ่มพื้นฐาน -->
+    <script src="data.js?v=8"></script>
+</head>
+
+<body>
+
+<div class="header">
+  <h1>00K ENGAGEMENT</h1>
+  <p>CALVIN KLEIN x NYFW</p>
+</div>
+
+<div class="nav-container" style="margin-top: 12px;">
+  <button class="top-btn" onclick="playMusic()"><i class="fa-solid fa-play"></i> Play Music</button>
+  <a href="index.html" class="top-btn"><i class="fa-solid fa-arrow-left"></i> Back Home</a>
+</div>
+
+<iframe
+  id="bgMusic"
+  width="0"
+  height="0"
+  src="https://www.youtube.com/embed/2VrpfCX2SCM?enablejsapi=1"
+  frameborder="0"
+  allow="autoplay">
+</iframe>
+
+<div class="type-tabs">
+  <button id="tabAll" onclick="switchType('all')" class="active">All</button>
+  <button id="tabLingling" onclick="switchType('lingling')">00K</button>
+  <button id="tabBrand" onclick="switchType('brand')">Brand & Official</button>
+  <button id="tabMedia" onclick="switchType('media')">Media & KOL</button>
+</div>
+
+<div class="controls">
+  <select id="platformFilter" onchange="loadData()">
+    <option value="all">All Platforms</option>
+  </select>
+
+  <select id="sortSelect" onchange="loadData()">
+    <option value="sheet_desc">Latest</option>
+    <option value="sheet_asc">Oldest</option>
+    <option value="eng_desc">Engagement: High → Low</option>
+    <option value="eng_asc">Engagement: Low → High</option>
+  </select>
+</div>
+
+<!-- ================= POST COUNT BREAKDOWN ================= -->
+<div class="quest-container">
+  <div class="quest-header">
+    <div class="quest-title"><i class="fa-solid fa-layer-group" style="color:var(--accent);"></i> POST COUNT BREAKDOWN</div>
+    <div style="font-size: 11px; color: var(--text-muted);">Campaign Overview</div>
+  </div>
+  <div class="quest-grid">
+    <div class="quest-card">
+      <div class="quest-label">00K Posts</div>
+      <div class="quest-values" id="countLingling">0</div>
+    </div>
+    <div class="quest-card">
+      <div class="quest-label">Brand & Official Posts</div>
+      <div class="quest-values" id="countBrand">0</div>
+    </div>
+    <div class="quest-card">
+      <div class="quest-label">Media & KOL</div>
+      <div class="quest-values" id="countMedia">0</div>
+    </div>
+  </div>
+</div>
+
+<div id="globalSummary" style="display: none;"></div>
+
+<!-- Container สำหรับแสดงผลแบบแบ่งโซน -->
+<div id="splitContainer">
+  <div class="section-container" id="linglingSectionHeader">
+    <div class="section-title">00K</div>
+  </div>
+  <div id="linglingContent" class="grid"></div>
+
+  <div class="section-container" id="brandSectionHeader">
+    <div class="section-title">Brand & Official Account</div>
+  </div>
+  <div id="brandContent"></div>
+
+  <div class="section-container" id="mediaSectionHeader" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+    <div class="section-title">Media & KOL</div>
+    <select id="soloFilter" onchange="loadData()" style="padding: 4px 10px; font-size: 11px;">
+      <option value="all">All Media</option>
+      <option value="solo">Solo Only</option>
+    </select>
+  </div>
+  <div id="mediaContent"></div>
+</div>
+
+<div class="progress-section">
+  <div class="progress-label">
+    <span>Posts Reviewed</span>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button class="reset-btn" onclick="resetProgress()"><i class="fa-solid fa-rotate-right"></i> Reset Progress</button>
+      <span id="reviewCount">0 / 0</span>
+    </div>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+</div>
+
+<!-- ================= กล่องลอยสุ่มแคปชันแบบพร้อมกดได้ทันที ================= -->
+<div id="floatingCaptionWidget" class="floating-widget">
+  <div class="widget-header">
+    <div class="widget-title"><i class="fa-solid fa-wand-magic-sparkles" style="color:var(--accent);"></i> CK x NYFW Captions</div>
+    <button class="widget-close" onclick="hideWidget()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+
+  <div class="widget-controls">
+    <button class="widget-platform-btn active" onclick="setWidgetPlatform('IG', this)">IG</button>
+    <button class="widget-platform-btn" onclick="setWidgetPlatform('X', this)">X</button>
+  </div>
+
+  <div class="widget-toggle">
+    <span id="widgetToggleLabel">#️⃣ With Hashtag</span>
+    <label class="switch">
+      <input type="checkbox" id="widgetTagSwitch" checked onchange="toggleWidgetHashtags(this)">
+      <span class="slider-toggle"></span>
+    </label>
+  </div>
+
+  <div id="widgetCaptionDisplay" class="widget-caption-box">
+    Loading....
+  </div>
+
+  <div class="widget-actions">
+    <button class="widget-btn btn-random" onclick="generateWidgetCaption()"><i class="fa-solid fa-shuffle"></i> Random</button>
+    <button class="widget-btn btn-copy" onclick="copyWidgetCaption()"><i class="fa-regular fa-copy"></i> Copy</button>
+  </div>
+</div>
+
+<button id="floatingTriggerBtn" class="floating-trigger-btn" onclick="showWidget()">
+  <i class="fa-solid fa-wand-magic-sparkles"></i> Open Captions Box
+</button>
+
+<div id="toast" class="toast">Copied to Clipboard!</div>
+
+<!-- เชื่อมโยงไฟล์ JavaScript หลักของหน้านี้เพียงไฟล์เดียว -->
+<script src="js/ckss27-script.js" defer></script>
+
+</body>
+</html>

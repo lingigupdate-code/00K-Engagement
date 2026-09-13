@@ -1,713 +1,130 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-<meta charset="UTF-8">
-<title>00K Engagement - Calvin Klein x NYFW</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>00K HUB V2</title>
 
-<style>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#F9B2D7">
+    <link rel="apple-touch-icon" href="icon-192.png">
 
-/* ================= THEME SYSTEM ================= */
-
-:root{
-  --primary:#111111;
-  --accent:#8B7355;
-  --bg:#F9F9F9;
-  --card:#ffffff;
-}
-
-body{
-  margin:0;
-  background:var(--bg);
-  font-family:'Inter',sans-serif;
-  color:#333333;
-  transition:0.4s ease;
-}
-
-/* Artist Theme */
-body[data-theme="artist"]{
-  --primary:#000000;
-  --accent:#A3835F;
-}
-
-/* Media Theme */
-body[data-theme="media"]{
-  --primary:#555555;
-  --accent:#111111;
-}
-
-/* ================= HEADER ================= */
-
-.header{
-  text-align:center;
-  padding:50px 20px 20px;
-}
-.header h1{
-  font-weight:700;
-  font-size:36px;
-  letter-spacing:2px;
-  color:var(--primary);
-  transition:0.4s;
-}
-.header p{
-  font-size:14px;
-  color:#777;
-  letter-spacing:1px;
-  margin-top:8px;
-}
-
-/* ================= TYPE TABS ================= */
-
-.type-tabs{
-  display:flex;
-  justify-content:center;
-  gap:15px;
-  margin-bottom:30px;
-}
-
-.type-tabs button{
-  padding:10px 20px;
-  border-radius:30px;
-  border:1px solid var(--primary);
-  background:#fff;
-  color:var(--primary);
-  cursor:pointer;
-  font-weight:600;
-  transition:0.3s;
-}
-
-.type-tabs button:hover{
-  background:var(--primary);
-  color:#fff;
-}
-
-.type-tabs button.active{
-  background:var(--primary);
-  color:#fff;
-}
-
-/* ================= CONTROLS ================= */
-
-.controls{
-  display:flex;
-  justify-content:center;
-  gap:15px;
-  margin:30px 0;
-  flex-wrap:wrap;
-}
-
-select{
-  padding:10px 16px;
-  border-radius:10px;
-  border:1px solid #D9D9D9;
-  background:#fff;
-  font-weight:500;
-}
-
-/* ================= SUMMARY ================= */
-
-.summary{
-  width:90%;
-  max-width:1200px;
-  margin:0 auto 30px;
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:20px;
-}
-
-.summary-item{
-  background:var(--card);
-  padding:20px;
-  border-radius:16px;
-  border:1px solid #D9D9D9;
-  text-align:center;
-  transition:0.3s;
-}
-
-.summary-item h3{
-  font-size:12px;
-  letter-spacing:1px;
-}
-
-.summary-item .number{
-  font-size:22px;
-  font-weight:600;
-  color:var(--accent);
-  transition:0.3s;
-}
-
-/* ================= GRID & EMPTY STATE ================= */
-
-.grid{
-  width:90%;
-  max-width:1200px;
-  margin:40px auto;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:25px;
-}
-
-@media(max-width:900px){ .grid{grid-template-columns:repeat(2,1fr);} }
-@media(max-width:600px){ .grid{grid-template-columns:1fr;} }
-
-.card{
-  background:var(--card);
-  border:1px solid #D9D9D9;
-  border-radius:18px;
-  padding:18px;
-  transition:0.3s;
-}
-
-.card:hover{
-  transform:translateY(-5px);
-  box-shadow:0 10px 25px rgba(0,0,0,0.08);
-}
-
-/* กล่องเปล่าสำหรับรอข้อมูล (Empty / Loading State) */
-.empty-state{
-  grid-column: 1 / -1;
-  background: var(--card);
-  border: 2px dashed #D9D9D9;
-  border-radius: 18px;
-  padding: 50px 20px;
-  text-align: center;
-  color: #777;
-}
-
-.empty-state h3{
-  font-size: 18px;
-  color: var(--primary);
-  margin-bottom: 8px;
-}
-
-.empty-state p{
-  font-size: 14px;
-  margin: 0;
-}
-
-/* Spinner สำหรับโหลดข้อมูล */
-.spinner{
-  width: 32px;
-  height: 32px;
-  border: 3px solid #E0E0E0;
-  border-top: 3px solid var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto 15px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* ===== Media Card Style Upgrade ===== */
-
-.card.media-card{
-  border-left:4px solid var(--accent);
-  padding-top:22px;
-}
-
-.card.media-card h3{
-  font-size:18px;
-  line-height:1.4;
-  font-weight:600;
-}
-
-.card.media-card .stats{
-  border-top:1px solid #E5E5E5;
-  padding-top:12px;
-  margin-top:14px;
-}
-
-.card.media-card button{
-  background:transparent;
-  color:var(--primary);
-  border:1px solid var(--primary);
-}
-
-.card.media-card button:hover{
-  background:var(--primary);
-  color:#fff;
-}
-
-.post-img{
-  width:100%;
-  border-radius:14px;
-  aspect-ratio:4/5;
-  object-fit:cover;
-  margin-bottom:12px;
-}
-
-.badge{
-  display:inline-block;
-  padding:4px 12px;
-  border-radius:20px;
-  font-size:11px;
-  font-weight:600;
-  margin-bottom:8px;
-  color:#fff;
-}
-
-.badge.artist{
-  background:var(--primary);
-}
-
-.badge.media{
-  background:var(--accent);
-}
-
-.stats{
-  font-size:13px;
-  margin:10px 0;
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
-
-button{
-  background:var(--primary);
-  color:#fff;
-  border:none;
-  padding:8px 14px;
-  border-radius:8px;
-  cursor:pointer;
-  transition:0.3s;
-}
-
-button:hover{
-  background:var(--accent);
-}
-
-/* ===== Opened Button Animation ===== */
-
-button.opened{
-  background:#2E7D32 !important;
-  color:#fff;
-  transform:scale(1.05);
-  transition:0.3s ease;
-}
-
-button.opened::after{
-  content:" ✓";
-  font-weight:700;
-}
-
-/* ===== Progress Section ===== */
-
-.progress-section{
-  width:90%;
-  max-width:1200px;
-  margin:20px auto 10px;
-}
-
-.progress-label{
-  font-size:13px;
-  margin-bottom:6px;
-}
-
-.progress-bar{
-  width:100%;
-  height:10px;
-  background:#E0E0E0;
-  border-radius:20px;
-  overflow:hidden;
-}
-
-.progress-fill{
-  height:100%;
-  width:0%;
-  background:var(--accent);
-  transition:width 0.5s ease;
-  border-radius:20px;
-}
-
-/* ================= MUSIC BUTTON ================= */
-
-.music-btn{
-  display:block;
-  margin:0 auto 20px;
-}
-
-</style>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- เชื่อมโยงไฟล์ CSS ภายนอก -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <script src="data.js?v=9"></script>
 </head>
 
-<body>
-
-<div class="header">
-  <h1>00K ENGAGEMENT</h1>
-  <p>CALVIN KLEIN x NYFW</p>
-</div>
-
-<div class="type-tabs">
-  <button id="tabAll" onclick="switchType('all')" class="active">All</button>
-  <button id="tabArtist" onclick="switchType('artist')">Lingling & Brand</button>
-  <button id="tabMedia" onclick="switchType('media')">Media & KOL</button>
-</div>
-
-<button class="music-btn" onclick="playMusic()">▶ Play Music</button>
-
-<iframe
-  id="bgMusic"
-  width="0"
-  height="0"
-  src="https://www.youtube.com/embed/W1tzURKYFNs?enablejsapi=1"
-  frameborder="0"
-  allow="autoplay">
-</iframe>
-
-<script src="https://www.youtube.com/iframe_api"></script>
-
-<div class="controls">
-  <select id="platformFilter" onchange="loadData()">
-    <option value="all">All Platforms</option>
-  </select>
-
-  <select id="sortSelect" onchange="loadData()">
-    <option value="eng_desc">Engagement: High → Low</option>
-    <option value="eng_asc">Engagement: Low → High</option>
-    <option value="reach_desc">Reach: High → Low</option>
-    <option value="reach_asc">Reach: Low → High</option>
-  </select>
-</div>
-
-<div id="globalSummary" class="summary"></div>
-<div id="content" class="grid"></div>
-
-<div class="progress-section">
-  <div class="progress-label">
-    Posts Reviewed: <span id="reviewCount">0</span>
-  </div>
-  <div class="progress-bar">
-    <div class="progress-fill" id="progressFill"></div>
-  </div>
-</div>
-
-<script>
-
-let currentType="all";
-
-function switchType(type){
-  currentType=type;
-
-  document.querySelectorAll(".type-tabs button")
-    .forEach(btn=>btn.classList.remove("active"));
-
-  if(type==="artist"){
-    document.getElementById("tabArtist").classList.add("active");
-    document.body.setAttribute("data-theme","artist");
-  }
-  else if(type==="media"){
-    document.getElementById("tabMedia").classList.add("active");
-    document.body.setAttribute("data-theme","media");
-  }
-  else{
-    document.getElementById("tabAll").classList.add("active");
-    document.body.removeAttribute("data-theme");
-  }
-
-  loadData();
-}
-
-let player;
-let playerReady = false;
-
-function onYouTubeIframeAPIReady() {
-  player = new YT.Player('bgMusic', {
-    events: {
-      'onReady': function() {
-        playerReady = true;
-      }
-    }
-  });
-}
-
-function playMusic(){
-  if(playerReady){
-    player.playVideo();
-  } else {
-    console.log("Player not ready yet");
-  }
-}
-
-const API_URL="https://script.google.com/macros/s/AKfycbwrnq7GGP6YB5greHUJWQOKoaK_juJeWvUKsq7R27cuNVXtnrPlRKRurlLVb2RQEVtD/exec";
-
-function loadData(){
-  // แสดงสถานะกำลังโหลดในกล่องเปล่าระหว่างรอ fetch
-  const container = document.getElementById("content");
-  if(container.innerHTML === "") {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="spinner"></div>
-        <h3>Loading Campaign Data...</h3>
-        <p>กำลังดึงข้อมูลโพสต์จาก Google Sheets</p>
-      </div>
-    `;
-  }
-
-  fetch(API_URL)
-  .then(res=>res.json())
-  .then(data=>{
-    populatePlatformFilter(data);
-    render(data);
-  })
-  .catch(err => {
-    container.innerHTML = `
-      <div class="empty-state">
-        <h3>Awaiting Data Connection</h3>
-        <p>ยังไม่พบข้อมูล หรือไม่สามารถเชื่อมต่อ API ได้ในขณะนี้</p>
-      </div>
-    `;
-  });
-}
-
-function populatePlatformFilter(data){
-  const select=document.getElementById("platformFilter");
-  const currentValue=select.value;
-  select.innerHTML='<option value="all">All Platforms</option>';
-  const platforms=[...new Set(data.map(p=>p.platform?.trim()))];
-  platforms.forEach(p=>{
-    if(!p)return;
-    const option=document.createElement("option");
-    option.value=p;
-    option.textContent=p;
-    select.appendChild(option);
-  });
-  select.value=currentValue||"all";
-}
-
-function render(data){
-
-  const selectedPlatform=document.getElementById("platformFilter").value;
-  const sort=document.getElementById("sortSelect").value;
-
-  data.forEach(p=>{
-    if(!p.sheetType){
-      p.sheetType = "artist";
-    }
-  });
-
-  if(selectedPlatform!=="all"){
-    data=data.filter(p=>p.platform===selectedPlatform);
-  }
-
-  if(currentType!=="all"){
-    data = data.filter(p =>
-      (p.sheetType || "")
-        .toString()
-        .trim()
-        .toLowerCase() === currentType
-    );
-  }
-
-  data.forEach(p=>{
-    p.eng =
-      Number(p.likes||0) +
-      Number(p.comments||0) +
-      Number(p.shares||0) +
-      Number(p.reposts||0);
-  });
-
-  switch(sort){
-    case "eng_desc":data.sort((a,b)=>b.eng-a.eng);break;
-    case "eng_asc":data.sort((a,b)=>a.eng-b.eng);break;
-    case "reach_desc":data.sort((a,b)=>Number(b.views||0)-Number(a.views||0));break;
-    case "reach_asc":data.sort((a,b)=>Number(a.views||0)-Number(b.views||0));break;
-  }
-
-  renderSummary(data);
-  renderCards(data);
-}
-
-
-function renderSummary(dataset){
-
-  let reach=0,eng=0,repostTotal=0;
-
-  dataset.forEach(p=>{
-    reach+=Number(p.views||0);
-    eng+=p.eng||0;
-    repostTotal+=Number(p.reposts||0);
-  });
-
-  document.getElementById("globalSummary").innerHTML=`
-    <div class="summary-item">
-      <h3>REACH</h3>
-      <div class="number">${reach.toLocaleString()}</div>
-    </div>
-
-    <div class="summary-item">
-      <h3>ENGAGEMENT</h3>
-      <div class="number">${eng.toLocaleString()}</div>
-    </div>
-
-    <div class="summary-item">
-      <h3>REPOSTS</h3>
-      <div class="number">${repostTotal.toLocaleString()}</div>
-    </div>
-
-    <div class="summary-item">
-      <h3>TOTAL POSTS</h3>
-      <div class="number">${dataset.length}</div>
-    </div>
-  `;
-}
-
-function getPlatformIcon(platform){
-
-  if(!platform) return "";
-
-  const p = platform.toLowerCase();
-
-  if(p.includes("tiktok")){
-    return "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/tiktok.svg";
-  }
-  if(p.includes("instagram") || p.includes("ig")){
-    return "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg";
-  }
-  if(p === "x" || p.includes("twitter")){
-    return "https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/x.svg";
-  }
-
-  return "";
-}
-
-function getReviewedPosts(){
-  return JSON.parse(localStorage.getItem("reviewedPosts") || "[]");
-}
-
-function saveReviewedPosts(list){
-  localStorage.setItem("reviewedPosts", JSON.stringify(list));
-}
-
-function markAsReviewed(id){
-  let reviewed = getReviewedPosts();
-  if(!reviewed.includes(id)){
-    reviewed.push(id);
-    saveReviewedPosts(reviewed);
-  }
-}
-
-function handleOpen(button, link, postId){
-
-  window.open(link,'_blank');
-
-  markAsReviewed(postId);
-
-  button.classList.add("opened");
-  button.disabled = true;
-
-  updateProgress();
-}
-
-function updateProgress(){
-
-  const reviewed = getReviewedPosts();
-  const cards = document.querySelectorAll(".card:not(.empty-state)");
-
-  let visiblePostIds = [];
-
-  cards.forEach(card=>{
-    const btn = card.querySelector("button");
-    if(btn){
-      const onclickAttr = btn.getAttribute("onclick");
-      const match = onclickAttr.match(/,'(.*?)'\)/);
-      if(match && match[1]){
-        visiblePostIds.push(match[1]);
-      }
-    }
-  });
-
-  const reviewedVisible = visiblePostIds.filter(id=>reviewed.includes(id));
-
-  const count = reviewedVisible.length;
-  const totalPosts = visiblePostIds.length;
-
-  document.getElementById("reviewCount").innerText =
-    count + " / " + totalPosts;
-
-  const percent = totalPosts ? (count/totalPosts)*100 : 0;
-
-  document.getElementById("progressFill").style.width = percent + "%";
-}
-
-function renderCards(data){
-
-  const container=document.getElementById("content");
-  container.innerHTML="";
-
-  const reviewed = getReviewedPosts();
-
-  if(!data || data.length===0){
-    container.innerHTML=`
-      <div class="empty-state">
-        <h3>Awaiting Campaign Launch</h3>
-        <p>ยังไม่มีข้อมูลโพสต์ในหมวดหมู่นี้ รอการอัปเดตข้อมูลจากทีมงาน</p>
-      </div>
-    `;
-    updateProgress();
-    return;
-  }
-
-  data.forEach(p=>{
-
-    const type = (p.sheetType || "").toString().trim().toLowerCase();
-    const isMedia = type === "media";
-    const cardClass = isMedia ? "card media-card" : "card";
-    const postId = p.link;
-
-    const imageHTML = !isMedia
-      ? `<img class="post-img" src="${p.thumbnail || ''}">`
-      : "";
-
-    const iconURL = getPlatformIcon(p.platform);
-
-    const titleHTML = `
-      <div class="platform-title">
-        ${iconURL ? `<img class="platform-icon" src="${iconURL}">` : ""}
-        <span>${p.post_name||''}</span>
-      </div>
-    `;
-
-    const isOpened = reviewed.includes(postId);
-
-    container.innerHTML+=`
-      <div class="${cardClass}">
-
-        ${imageHTML}
-
-        <div class="badge ${p.sheetType}">
-          ${p.sheetType==="artist"?"Lingling & Brand":"Media"}
+<body data-theme="DiorOpenStore">
+    <div id="cursorGlow"></div>
+    
+    <div class="container">
+        <div class="card bio-card">
+            <h1>00K BIOGRAPHY</h1>
+            <div class="social-header">
+                <div class="footer-label">Connect with 00K</div>
+                <div class="social-grid">
+                    <a href="https://www.instagram.com/linglingkwong" target="_blank" class="social-item has-image">
+                        <img src="https://lingigupdate-code.github.io/00k-Caption/image/instagram.jpg" alt="Instagram"><span>Instagram</span>
+                    </a>
+                    <a href="https://x.com/linglingsirilak" target="_blank" class="social-item has-image">
+                        <img src="https://lingigupdate-code.github.io/00k-Caption/image/x.jpg" alt="X"><span>X</span>
+                    </a>
+                    <a href="https://www.tiktok.com/@linglingkwong" target="_blank" class="social-item has-image">
+                        <img src="https://lingigupdate-code.github.io/00k-Caption/image/tiktok.jpg" alt="TikTok"><span>TikTok</span>
+                    </a>
+                    <a href="https://weibo.com/u/7884299354" target="_blank" class="social-item has-image">
+                        <img src="https://lingigupdate-code.github.io/00k-Caption/image/weibo.jpg" alt="Weibo"><span>Weibo</span>
+                    </a>
+                    <a href="https://ch3plus.com/artists/451" target="_blank" class="social-item has-image">
+                        <img src="https://lingigupdate-code.github.io/00k-Caption/image/3plus.jpg" alt="3Plus"><span>3Plus</span>
+                    </a>
+                    <a href="https://youtu.be/gnsw94UdSds" target="_blank" class="social-item has-image">
+                        <img src="https://lingigupdate-code.github.io/00k-Caption/image/inloveforever.jpg" alt="วาดฝันวันวิวาห์"><span>วาดฝันวันวิวาห์</span>
+                    </a>
+                    <a href="https://alwayswonder-co.com/" target="_blank" class="social-item has-image">
+                        <img src="https://lingigupdate-code.github.io/00k-Caption/image/alwayswonder.jpg" alt="AlwaysWonder"><span>AlwaysWonder</span>
+                    </a>
+                    <a href="https://www.instagram.com/kwongkeeroast" target="_blank" class="social-item has-image">
+                        <img src="https://lingigupdate-code.github.io/00k-Caption/image/kwongkeeroast.jpg" alt="Kwong Kee Roast"><span>KwongKeeRoast</span>
+                    </a>
+                    <a href="https://www.instagram.com/kwong.pastry" target="_blank" class="social-item has-image">
+                        <img src="https://lingigupdate-code.github.io/00k-Caption/image/kwongpastry.jpg" alt="Kwong Pastry"><span>KwongPastry</span>
+                    </a>
+                </div>
+            </div>
+
+            <a href="presenters.html" class="business-btn">
+                <i class="fa-solid fa-briefcase"></i> 00K BUSINESS BRAND CARDS
+            </a>
+            <a href="engagement.html" class="business-btn engage-highlight-btn" style="margin-top: 10px;">
+                <i class="fa-solid fa-chart-line"></i> 00K CK x NYFW SS27 Engagement
+            </a>
         </div>
 
-        ${titleHTML}
+        <div class="card gen-card">
+            <h2 class="section-title">00K RANDOM CAPTIONS</h2>
+            
+            <div class="brand-tabs">
+                <button class="brand-btn active" onclick="setBrand('Dior',this)">Dior</button>
+                <button class="brand-btn" onclick="setBrand('Cartier',this)">Cartier</button>
+                <button class="brand-btn" onclick="setBrand('CalvinKlein',this)">Calvin Klein</button>
+            </div>
 
-        <div class="stats">
-          <div>👁 ${Number(p.views||0).toLocaleString()}</div>
-          <div>❤️ ${Number(p.likes||0).toLocaleString()}</div>
-          <div>💬 ${Number(p.comments||0).toLocaleString()}</div>
-          <div>🔁 ${Number(p.shares||0).toLocaleString()}</div>
-          <div>🔄 ${Number(p.reposts||0).toLocaleString()}</div>
+            <div class="campaign-slider" id="slider">
+                <!-- Open Store อยู่ตำแหน่งแรกสุด -->
+                <div class="campaign-item active" data-c="Dior_OpenStore" onclick="selectCampaign(this)">Open Store</div>
+                <div class="campaign-item" data-c="Dior_Fashion" onclick="selectCampaign(this)">Fashion</div>
+                <div class="campaign-item" data-c="Dior_Beauty" onclick="selectCampaign(this)">Beauty</div>
+                <div class="campaign-item" data-c="Dior_EyeWear" onclick="selectCampaign(this)">Eyewear</div>
+                <div class="campaign-item" data-c="Dior_PFW" onclick="selectCampaign(this)">PFW</div>
+                
+                <!-- Cartier -->
+                <div class="campaign-item" data-c="Cartier" onclick="selectCampaign(this)" style="display:none;">Cartier</div>
+
+                <!-- Calvin Klein -->
+                <div class="campaign-item" data-c="CalvinKlein" onclick="selectCampaign(this)" style="display:none;">Calvin Klein</div>
+                <div class="campaign-item" data-c="NYFW" onclick="selectCampaign(this)" style="display:none;">NYFW</div>
+            </div>
+            
+            <div class="slider-dots" id="dotsContainer"></div>
+
+            <div class="control-group">
+                <div class="platform-row">
+                    <button class="platform-btn active" onclick="setPlatform('IG',this)">IG</button>
+                    <button class="platform-btn" onclick="setPlatform('X',this)">X</button>
+                </div>
+                
+                <div class="toggle-container">
+                    <div class="toggle-label" id="toggleLabel">#️⃣ With Hashtag</div>
+                    <label class="switch">
+                        <input type="checkbox" id="tagSwitch" checked onchange="toggleHashtags(this)">
+                        <span class="slider-toggle"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="status" id="statusText">Open Store • IG</div>
+
+            <div id="progressContainer" style="width: 100%; background: rgba(255,255,255,0.1); height: 4px; border-radius: 10px; margin: 8px 0; display: none; overflow: hidden;">
+                <div id="progressBar" style="width: 0%; height: 100%; background: var(--accent); transition: width 0.3s ease;"></div>
+            </div>
+
+            <div class="actions">
+                <button class="main-btn" onclick="spin()">✨ RANDOM CAPTION</button>
+                <button class="main-btn copy-btn" onclick="copy()">COPY</button>
+            </div>
+
+            <div id="result" class="result"></div>
         </div>
+    </div>
 
-        <button 
-          class="${isOpened ? "opened" : ""}"
-          ${isOpened ? "disabled" : ""}
-          onclick="handleOpen(this,'${p.link}','${postId}')">
-          ${isOpened ? "Opened" : "Open Post"}
-        </button>
+    <div id="toast" class="toast">Copied to Clipboard!</div>
 
-      </div>
-    `;
-  });
-
-  updateProgress();
-}
-
-loadData();
-setInterval(loadData, 60000);
-
-</script>
-
+    <!-- เชื่อมโยงไฟล์ JavaScript ภายนอก -->
+    <script src="script.js" defer></script>
 </body>
 </html>
