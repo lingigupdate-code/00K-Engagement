@@ -18,19 +18,18 @@ const ITEMS_PER_PAGE = 24;
 
 const n = t => (t || "").toLowerCase().replace(/\s|_/g, "");
 
-function loadCaptionSourceData() {
-  let rawData = null;
-  if (typeof defaultData !== 'undefined') {
-      rawData = defaultData;
-  } else if (typeof data !== 'undefined') {
-      rawData = data;
-  } else if (typeof captionsData !== 'undefined') {
-      rawData = captionsData;
-  }
-
-  if (rawData) {
-      globalCaptionsData = rawData.captions || (Array.isArray(rawData) ? rawData : []);
-      globalHashtagData = rawData.hashtags || [];
+async function loadCaptionSourceData() {
+  try {
+    const response = await fetch('data-index.json?v=' + Date.now());
+    if (!response.ok) throw new Error("No Found Data");
+    const d = await response.json();
+    
+    globalCaptionsData = d.captions || (Array.isArray(d) ? d : (d.items || []));
+    globalHashtagData = d.hashtags || [];
+    
+    generateWidgetCaption();
+  } catch (err) {
+    console.error("Failed to load captions from data-index.json:", err);
   }
 }
 
