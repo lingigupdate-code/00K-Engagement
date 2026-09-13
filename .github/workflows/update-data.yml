@@ -28,6 +28,6 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          # แก้ไขบรรทัดนี้: ใส่ชื่อไฟล์ JSON ที่ดึงจริง (หรือใช้ *.json เพื่อดึงไฟล์ json ทั้งหมดที่สร้างขึ้น)
-          git add data-presenter.json data-ckss27.json
+          # เพิ่ม data-index.json ลงในรายการสั่ง push
+          git add data-index.json data-presenter.json data-ckss27.json
           git diff --quiet && git diff --staged --quiet || (git commit -m "Auto update JSON files [skip ci]" && git push)
