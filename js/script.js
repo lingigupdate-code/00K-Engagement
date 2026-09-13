@@ -14,36 +14,60 @@ function updateStatus() {
     document.getElementById("statusText").innerText = label + " • " + currentPlatform;
 }
 
-// 🎯 โหลดข้อมูลโดยตรงจากตัวแปรใน data-index.js
+// 🎯 โหลดข้อมูลจาก data-index.json
+const DATA_INDEX_URL = "data-index.json";
+const CACHE_KEY = "00k_index_data_cache";
+
 async function loadData() {
-    let rawData = null;
-
-    if (typeof defaultData !== 'undefined') {
-        rawData = defaultData;
-    } else if (typeof data !== 'undefined') {
-        rawData = data;
-    } else if (typeof captionsData !== 'undefined' && !Array.isArray(captionsData)) {
-        rawData = captionsData;
+    // 1. ลองอ่านจาก LocalStorage ในเครื่องก่อน (โหลดไวทันใจ)
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    if (cachedData) {
+        try {
+            const d = JSON.parse(cachedData);
+            captionsData = d.captions || [];
+            hashtagData = d.hashtags || [];
+        } catch (e) {
+            console.error("Cache parse error", e);
+        }
     }
 
-    if (rawData) {
-        captionsData = rawData.captions || [];
-        hashtagData = rawData.hashtags || [];
+    // 2. ถ้ายังไม่มีข้อมูล หรือต้องการอัปเดต ให้ดึงจาก data-index.json สดๆ
+    if (!captionsData || captionsData.length === 0) {
+        await manualUpdateAllData(false);
+    } else {
+        theme(currentCampaign);
+        updateStatus();
+        updateDots();
     }
-
-    theme(currentCampaign);
-    updateStatus();
-    updateDots();
 }
 
+// 🎯 ฟังก์ชันสำหรับกดอัปเดตข้อมูลทั้งหมดจาก data-index.json
+async function manualUpdateAllData(showAlert = true) {
+    try {
+        const res = await fetch(DATA_INDEX_URL + "?v=" + Date.now());
+        if (!res.ok) throw new Error("ไม่สามารถโหลดไฟล์ data-index.json ได้");
+        
+        const d = await res.json();
+        captionsData = d.captions || [];
+        hashtagData = d.hashtags || [];
+
+        // บันทึกลง LocalStorage
+        localStorage.setItem(CACHE_KEY, JSON.stringify(d));
+
+        theme(currentCampaign);
+        updateStatus();
+        updateDots();
+
+        if (showAlert) alert("✅ อัปเดตข้อมูลแคปชันและแฮชแท็กจาก data-index.json สำเร็จ!");
+    } catch (err) {
+        console.error("Failed to load data-index.json:", err);
+        if (showAlert) alert("❌ โหลดข้อมูลไม่สำเร็จ กรุณาตรวจสอบว่ามีไฟล์ data-index.json อยู่ในโปรเจกต์");
+    }
+}
+
+// ฟังก์ชันกดอัปเดตเฉพาะแฮชแท็ก (ในกรณีนี้ดึงจากชุดเดียวกัน)
 function updateHashtagsOnly() {
-    loadData();
-    alert("✅ โหลดข้อมูลแฮชแท็กจาก data-index.js เรียบร้อยแล้ว!");
-}
-
-function manualUpdateAllData() {
-    loadData();
-    alert("✅ โหลดข้อมูลแคปชันและแฮชแท็กจาก data-index.js ใหม่เรียบร้อยแล้ว!");
+    manualUpdateAllData(true);
 }
 
 function clearCacheAndReload() {
@@ -67,7 +91,7 @@ function spin() {
     if (isSpinning) return;
     
     if (captionsData.length === 0) {
-        alert("ยังไม่มีข้อมูลแคปชัน กรุณาตรวจสอบไฟล์ data-index.js");
+        alert("ยังไม่มีข้อมูลแคปชัน กรุณากดปุ่มอัปเดตข้อมูลด้านล่าง...");
         return;
     }
 
