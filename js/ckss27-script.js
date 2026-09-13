@@ -66,6 +66,7 @@ function toggleWidgetHashtags(checkbox) {
 function generateWidgetCaption() {
   loadCaptionSourceData();
   const display = document.getElementById('widgetCaptionDisplay');
+  if (!display) return;
   
   const filtered = globalCaptionsData.filter(c => 
     n(c.brand) === n("CalvinKlein") && n(c.campaign) === n("NYFW")
@@ -76,6 +77,7 @@ function generateWidgetCaption() {
     return;
   }
 
+  // สุ่มเลือกข้อความ 1 ข้อความทันทีแบบนิ่งๆ ไม่รันวนลูป
   const randomCap = filtered[Math.floor(Math.random() * filtered.length)];
   let finalResult = randomCap;
 
