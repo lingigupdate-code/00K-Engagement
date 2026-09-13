@@ -14,11 +14,13 @@ function updateStatus() {
     document.getElementById("statusText").innerText = label + " • " + currentPlatform;
 }
 
-// ตั้งค่าที่มาข้อมูล static JSON และระบบ Cache
-const DATA_INDEX_URL = "data-index.json?v=" + Math.floor(Date.now() / (3 * 60 * 60 * 1000));
+// คีย์สำหรับเก็บ Cache ของแคปชันและแฮชแท็ก
+const DATA_INDEX_URL = "data-index.json";
 const CACHE_KEY = "00k_index_data_cache";
-const CACHE_TIME_KEY = "00k_index_cache_time";
-const THREE_HOURS = 3 * 60 * 60 * 1000;
+const HASHTAGS_CACHE_KEY = "00k_hashtags_only_cache";
+
+// ลิงก์ Apps Script ดึงเฉพาะแฮชแท็กสดๆ (หากต้องการอัปเดตแฮชแท็กบ่อยๆ)
+const HASHTAGS_API_URL = "https://script.google.com/macros/s/AKfycbzDpLJ0f6uCpHARY2pU8EZt5UDO1Bk3LOa_ZG-3llN_TYzrnjWj4AMA7ZZdz8i1pwlk/exec";
 
 // ระบบฐานข้อมูลภายในเครื่อง (IndexedDB)
 const DB_NAME = "00K_Database";
@@ -69,67 +71,74 @@ async function saveStoredData(data) {
     }
 }
 
-// ฟังก์ชันดึงข้อมูลฉบับปรับปรุง (อ่าน static JSON + Cache 3 ชม.)
+// 🎯 1. โหลดข้อมูลแคปชัน (ไม่มีหมดอายุ 3 ชม. ถ้านผู้ใช้ไม่กดอัปเดตเอง)
 async function loadData() {
-    // Step A: นำข้อมูลจาก data.js มาแสดงผลเบื้องต้นก่อน (Instant)
-    let rawData = null;
-    if (typeof defaultData !== 'undefined') {
-        rawData = defaultData;
-    } else if (typeof data !== 'undefined') {
-        rawData = data;
-    }
-
-    if (rawData) {
-        captionsData = rawData.captions || (Array.isArray(rawData) ? rawData : []);
-        hashtagData = rawData.hashtags || [];
-        theme(currentCampaign);
-        updateStatus();
-        updateDots();
-    }
-
-    // Step B: ตรวจสอบ Cache ใน LocalStorage
-    const now = Date.now();
-    const lastFetch = localStorage.getItem(CACHE_TIME_KEY);
+    // A. อ่านแคชแคปชันที่มีอยู่ในเครื่องก่อน
     const cachedData = localStorage.getItem(CACHE_KEY);
-
-    if (cachedData && lastFetch && (now - Number(lastFetch) < THREE_HOURS)) {
+    if (cachedData) {
         const d = JSON.parse(cachedData);
         captionsData = d.captions || (Array.isArray(d) ? d : []);
         hashtagData = d.hashtags || [];
+    }
+
+    // B. อ่านแคชแฮชแท็กฉุกเฉิน (ถ้ามีอัปเดตแยกไว้)
+    const cachedHashtags = localStorage.getItem(HASHTAGS_CACHE_KEY);
+    if (cachedHashtags) {
+        hashtagData = JSON.parse(cachedHashtags);
+    }
+
+    // C. ถ้ายังไม่มีแคปชันเลย ให้โหลดครั้งแรกสุดจาก data-index.json
+    if (!captionsData || captionsData.length === 0) {
+        await manualUpdateAllData(false); // โหลดแบบเงียบๆ ครั้งแรก
+    } else {
         theme(currentCampaign);
         updateStatus();
         updateDots();
-        return;
     }
+}
 
-    // Step C: ดึงข้อมูลจากไฟล์ data-index.json ที่ GitHub Actions อัปเดตไว้
+// 🎯 2. ฟังก์ชันอัปเดตเฉพาะ "แฮชแท็ก" (ดึงสดทันที)
+async function updateHashtagsOnly() {
     try {
-        const res = await fetch(DATA_INDEX_URL);
+        console.log("Fetching latest hashtags...");
+        const res = await fetch(DATA_INDEX_URL + "?t=" + Date.now()); // หรือใช้ HASHTAGS_API_URL
+        if (!res.ok) throw new Error("Fetch failed");
+        
+        const d = await res.json();
+        if (d.hashtags && d.hashtags.length > 0) {
+            hashtagData = d.hashtags;
+            localStorage.setItem(HASHTAGS_CACHE_KEY, JSON.stringify(d.hashtags));
+            alert("✅ อัปเดตแฮชแท็กเรียบร้อยแล้ว!");
+        }
+    } catch (err) {
+        console.error("Failed to update hashtags:", err);
+        alert("❌ ไม่สามารถอัปเดตแฮชแท็กได้ กรุณาลองใหม่อีกครั้ง");
+    }
+}
+
+// 🎯 3. ฟังก์ชันสำหรับให้ผู้ใช้กด "อัปเดตแคปชันและข้อมูลทั้งหมด" เองด้วยตัวเอง
+async function manualUpdateAllData(showAlert = true) {
+    try {
+        const res = await fetch(DATA_INDEX_URL + "?v=" + Date.now());
         if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
         const d = await res.json();
         
         captionsData = d.captions || (Array.isArray(d) ? d : []);
         hashtagData = d.hashtags || [];
 
-        // บันทึกลง LocalStorage และ IndexedDB สำรองไว้
+        // บันทึกลงความจำยาวๆ
         localStorage.setItem(CACHE_KEY, JSON.stringify(d));
-        localStorage.setItem(CACHE_TIME_KEY, now.toString());
+        localStorage.removeItem(HASHTAGS_CACHE_KEY); // ล้างแคชแฮชแท็กแยกเพื่อให้ใช้ตัวล่าสุดร่วมกัน
         saveStoredData(d);
 
         theme(currentCampaign);
         updateStatus();
         updateDots();
+
+        if (showAlert) alert("✅ อัปเดตข้อมูลแคปชันและแฮชแท็กทั้งหมดเรียบร้อยแล้ว!");
     } catch (err) {
-        console.log("Fetch data-index.json failed, falling back to local database:", err);
-        // กรณีดึงไม่สำเร็จ ให้ดึงจาก IndexedDB สำรองเดิม
-        const localData = await getStoredData();
-        if (localData && localData.captions) {
-            captionsData = localData.captions;
-            hashtagData = localData.hashtags || [];
-            theme(currentCampaign);
-            updateStatus();
-            updateDots();
-        }
+        console.error("Manual update failed:", err);
+        if (showAlert) alert("❌ อัปเดตข้อมูลไม่สำเร็จ กรุณาเช็กการเชื่อมต่ออินเทอร์เน็ต");
     }
 }
 
@@ -155,7 +164,7 @@ function spin() {
     if (isSpinning) return;
     
     if (captionsData.length === 0) {
-        alert("The data has not yet finished loading. Please wait...");
+        alert("ยังไม่มีข้อมูลแคปชัน กรุณากดปุ่มอัปเดตข้อมูลด้านล่าง...");
         return;
     }
 
@@ -179,14 +188,14 @@ function spin() {
             
             if (includeHashtags) {
                 const tags = hashtagData.find(h => n(h.brand) === n(currentBrand) && n(h.campaign) === n(currentCampaign) && n(h.platform) === n(currentPlatform));
-                el.innerText = cap + (tags ? "\n\n" + tags.hashtags : "");
+                el.innerText = cap + (tags && tags.hashtags ? "\n\n" + tags.hashtags : "");
             } else {
                 el.innerText = cap;
             }
             
             isSpinning = false;
-            progressBar.style.width = "100%";
-            setTimeout(() => { progressContainer.style.display = "none"; }, 300);
+            if (progressBar) progressBar.style.width = "100%";
+            setTimeout(() => { if (progressContainer) progressContainer.style.display = "none"; }, 300);
         }
     }, 60);
 }
@@ -245,7 +254,10 @@ function theme(c) {
         Cartier: "#F6FFDC44",
         CalvinKlein: "#E2E2E244"
     };
-    document.getElementById("cursorGlow").style.background = `radial-gradient(circle, ${glowColors[t] || '#F9B2D744'}, transparent 60%)`;
+    const glowEl = document.getElementById("cursorGlow");
+    if (glowEl) {
+        glowEl.style.background = `radial-gradient(circle, ${glowColors[t] || '#F9B2D744'}, transparent 60%)`;
+    }
 }
 
 function selectCampaign(el) {
@@ -273,12 +285,15 @@ function copy() {
     if (!t) return;
     navigator.clipboard.writeText(t);
     const toast = document.getElementById("toast");
-    toast.classList.add("show");
-    setTimeout(() => toast.classList.remove("show"), 2000);
+    if (toast) {
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2000);
+    }
 }
 
 function updateDots() {
     const dotsContainer = document.getElementById("dotsContainer");
+    if (!dotsContainer) return;
     const visibleItems = Array.from(document.querySelectorAll(".campaign-item")).filter(i => i.style.display !== "none");
     dotsContainer.innerHTML = ""; 
     visibleItems.forEach(item => {
@@ -288,26 +303,28 @@ function updateDots() {
     });
 }
 
-slider.addEventListener("scroll", () => {
-    if (isInternalScrolling) return;
-    const visibleItems = Array.from(document.querySelectorAll(".campaign-item")).filter(i => i.style.display !== "none");
-    let mid = slider.scrollLeft + (slider.offsetWidth / 2);
-    let best = null;
-    let dist = 9999;
-    visibleItems.forEach(i => {
-        let center = i.offsetLeft + (i.offsetWidth / 2);
-        let d = Math.abs(mid - center);
-        if (d < dist) { dist = d; best = i; }
+if (slider) {
+    slider.addEventListener("scroll", () => {
+        if (isInternalScrolling) return;
+        const visibleItems = Array.from(document.querySelectorAll(".campaign-item")).filter(i => i.style.display !== "none");
+        let mid = slider.scrollLeft + (slider.offsetWidth / 2);
+        let best = null;
+        let dist = 9999;
+        visibleItems.forEach(i => {
+            let center = i.offsetLeft + (i.offsetWidth / 2);
+            let d = Math.abs(mid - center);
+            if (d < dist) { dist = d; best = i; }
+        });
+        if (best && best.dataset.c !== currentCampaign) {
+            currentCampaign = best.dataset.c;
+            document.querySelectorAll(".campaign-item").forEach(i => i.classList.remove("active"));
+            best.classList.add("active");
+            theme(currentCampaign);
+            updateStatus();
+            updateDots();
+        }
     });
-    if (best && best.dataset.c !== currentCampaign) {
-        currentCampaign = best.dataset.c;
-        document.querySelectorAll(".campaign-item").forEach(i => i.classList.remove("active"));
-        best.classList.add("active");
-        theme(currentCampaign);
-        updateStatus();
-        updateDots();
-    }
-});
+}
 
 document.addEventListener("mousemove", e => {
     const g = document.getElementById("cursorGlow");
