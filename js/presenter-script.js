@@ -1,5 +1,5 @@
 // เปลี่ยนมาเรียกใช้ไฟล์ data-presenter.json ในเว็บตัวเอง
-const DATA_URL = "data-presenter.json?v=" + Math.floor(Date.now() / (3 * 60 * 60 * 1000));
+const DATA_URL = "data/data-presenter.json?v=" + Math.floor(Date.now() / (3 * 60 * 60 * 1000));
 
 const today = new Date();
 const dd = String(today.getDate()).padStart(2, '0');
