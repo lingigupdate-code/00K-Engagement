@@ -191,14 +191,18 @@ function loadData(){
     }
   }
 
-  fetch(API_URL)
+  fetch(API_URL + "?v=" + Date.now())
   .then(res => res.json())
   .then(data => {
-    globalRawDataset = data;
-    populatePlatformFilter(data);
-    render(data);
+    // 🟢 รองรับทุกรูปแบบโครงสร้างข้อมูล (ไม่ว่าจะมาเป็น Array ตรงๆ หรือห่อด้วย Object)
+    const items = Array.isArray(data) ? data : (data.items || data.posts || data.captions || data.data || []);
+    
+    globalRawDataset = items;
+    populatePlatformFilter(items);
+    render(items);
   })
   .catch(err => {
+    console.error("Error loading data-ckss27.json:", err);
     if(linglingCont) {
       linglingCont.innerHTML = `
         <div class="empty-state">
