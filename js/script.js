@@ -15,7 +15,7 @@ function updateStatus() {
 }
 
 // 🎯 โหลดข้อมูลจาก data-index.json
-const DATA_INDEX_URL = "data-index.json";
+const DATA_INDEX_URL = "data/data-index.json";
 const CACHE_KEY = "00k_index_data_cache";
 
 async function loadData() {
