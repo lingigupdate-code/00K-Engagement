@@ -2,15 +2,15 @@ name: Auto Update Data from Google Sheets
 
 on:
   schedule:
-    # รันอัตโนมัติทุกๆ 3 ชั่วโมง (นาทีที่ 0 ของชั่วโมงที่ 0, 3, 6, 9, 12, 15, 18, 21 UTC)
-    - cron: '0 */3 * * *'
+    # รันอัตโนมัติทุกๆ 3 ชั่วโมง
+    - cron: '0 */1 * * *'
   workflow_dispatch: # ปุ่มกดสั่งรันมือได้เองใน GitHub
 
 jobs:
   build-and-update:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # ให้สิทธิ์เขียนไฟล์กลับลงใน GitHub
+      contents: write # ให้สิทธิ์เขียนไฟล์กลับลงใน GitHub Repository
 
     steps:
       - name: Checkout Repository
@@ -28,5 +28,6 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add data.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto update data.json [skip ci]" && git push)
+          # แก้ไขบรรทัดนี้: ใส่ชื่อไฟล์ JSON ที่ดึงจริง (หรือใช้ *.json เพื่อดึงไฟล์ json ทั้งหมดที่สร้างขึ้น)
+          git add data-presenter.json data-ckss27.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto update JSON files [skip ci]" && git push)
