@@ -156,37 +156,23 @@ const CACHE_KEY = "00k_ckss27_cache";
 const CACHE_TIME_KEY = "00k_ckss27_cache_time";
 const THREE_HOURS = 3 * 60 * 60 * 1000;
 
-async function loadData() {
-  const lastFetch = localStorage.getItem(CACHE_TIME_KEY);
-  const cachedData = localStorage.getItem(CACHE_KEY);
-  const now = Date.now();
-
-  if (cachedData && lastFetch && (now - Number(lastFetch) < THREE_HOURS)) {
-    const data = JSON.parse(cachedData);
-    globalRawDataset = data;
-    populatePlatformFilter(data);
-    render(data);
-    return;
-  }
-
+// 🎯 ปรับปรุงใหม่: ดึงข้อมูลแคปชันและแฮชแท็กจาก data-index.json โดยตรง
+async function loadCaptionSourceData() {
   try {
-    const response = await fetch('data-ckss27.json?v=' + Math.floor(now / THREE_HOURS));
-    const data = await response.json();
+    const response = await fetch('data-index.json?v=' + Date.now());
+    if (!response.ok) throw new Error("ไม่สามารถโหลดไฟล์ data-index.json ได้");
     
-    const items = Array.isArray(data) ? data : (data.items || data.posts || data.captions || []);
+    const d = await response.json();
+    globalCaptionsData = d.captions || [];
+    globalHashtagData = d.hashtags || [];
     
-    localStorage.setItem(CACHE_KEY, JSON.stringify(items));
-    localStorage.setItem(CACHE_TIME_KEY, now.toString());
-    
-    globalRawDataset = items;
-    populatePlatformFilter(items);
-    render(items);
+    // สุ่มแสดงผลใน Widget ทันทีหลังจากโหลดข้อมูลเสร็จ
+    generateWidgetCaption();
   } catch (err) {
-    console.error("Error loading data-ckss27.json:", err);
-    if (cachedData) {
-      globalRawDataset = JSON.parse(cachedData);
-      populatePlatformFilter(globalRawDataset);
-      render(globalRawDataset);
+    console.error("Failed to load caption source data from JSON:", err);
+    const display = document.getElementById('widgetCaptionDisplay');
+    if (display) {
+      display.innerText = "ไม่สามารถโหลดข้อมูลแคปชันได้";
     }
   }
 }
