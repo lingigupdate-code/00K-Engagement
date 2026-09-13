@@ -151,17 +151,16 @@ function playMusic(){
   }
 }
 
-// ตั้งค่า Cache สิทธิพิเศษสำหรับหน้า CKSS27
+// ตั้งค่า Cache สำหรับหน้า CKSS27
 const CACHE_KEY = "00k_ckss27_cache";
 const CACHE_TIME_KEY = "00k_ckss27_cache_time";
-const THREE_HOURS = 3 * 60 * 60 * 1000; // 3 ชั่วโมง
+const THREE_HOURS = 3 * 60 * 60 * 1000;
 
 async function loadData() {
   const lastFetch = localStorage.getItem(CACHE_TIME_KEY);
   const cachedData = localStorage.getItem(CACHE_KEY);
   const now = Date.now();
 
-  // 1. ดึงจาก Cache ในเครื่องหากไม่เกิน 3 ชั่วโมง (เปิดปุ๊บขึ้นปั๊บ)
   if (cachedData && lastFetch && (now - Number(lastFetch) < THREE_HOURS)) {
     const data = JSON.parse(cachedData);
     globalRawDataset = data;
@@ -170,12 +169,11 @@ async function loadData() {
     return;
   }
 
-  // 2. ดึงจากไฟล์ data-ckss27.json ที่ GitHub Actions สร้างอัปเดตไว้
   try {
     const response = await fetch('data-ckss27.json?v=' + Math.floor(now / THREE_HOURS));
     const data = await response.json();
     
-    const items = Array.isArray(data) ? data : (data.items || data.posts || []);
+    const items = Array.isArray(data) ? data : (data.items || data.posts || data.captions || []);
     
     localStorage.setItem(CACHE_KEY, JSON.stringify(items));
     localStorage.setItem(CACHE_TIME_KEY, now.toString());
@@ -209,18 +207,19 @@ function populatePlatformFilter(data){
   select.value=currentValue||"all";
 }
 
+// 🎯 ปรับแต่งการจำแนกหมวดหมู่ย่อยให้รองรับโครงสร้าง JSON ใหม่แบบ 100%
 function classifySubCategory(p) {
-  const tabName = (p.sheetTab || p.sourceTab || p.tabName || "").toString().trim().toLowerCase();
-  if (tabName.includes("media") || tabName.includes("kol")) {
+  const tabName = (p.sourceTab || p.sheetTab || p.tabName || "").toString().trim().toLowerCase();
+  const type = (p.sheetType || "").toString().trim().toLowerCase();
+  
+  // 1. ตรวจสอบว่าเป็นหมวด Media & KOL หรือไม่
+  if (type === "media" || tabName.includes("media") || tabName.includes("kol")) {
     return "media";
   }
 
-  const type = (p.sheetType || "").toString().trim().toLowerCase();
-  if (type === "media") return "media";
-  if (type === "brand" || type.includes("brand")) return "brand";
-  
+  // 2. ถ้าเป็น Artist / Brand ให้จำแนกว่าเป็น Lingling หรือ Brand Official
   const name = (p.post_name || "").toLowerCase().replace(/\s+/g, "");
-  if (name.includes("linglingkwong") || name.includes("lingsirilak")) {
+  if (name.includes("lingling") || name.includes("linglingkwong") || name.includes("lingsirilak") || name.includes("00k")) {
     return "lingling";
   }
   
@@ -246,14 +245,11 @@ function sortDataByPlatform(data) {
 
 function render(data){
 
-  const selectedPlatform=document.getElementById("platformFilter").value;
-  const sort=document.getElementById("sortSelect").value;
+  const selectedPlatform=document.getElementById("platformFilter") ? document.getElementById("platformFilter").value : "all";
+  const sort=document.getElementById("sortSelect") ? document.getElementById("sortSelect").value : "default";
 
   const uniqueMap = new Map();
   data.forEach(p => {
-    if(!p.sheetType){
-      p.sheetType = "artist";
-    }
     const linkKey = String(p.link || "").trim();
     if (linkKey && !uniqueMap.has(linkKey)) {
       uniqueMap.set(linkKey, p);
@@ -312,38 +308,34 @@ function render(data){
   const mediaCont = document.getElementById("mediaContent");
 
   if(currentType === "lingling"){
-    linglingHeader.style.display = "block";
-    linglingContent.style.display = "grid";
-    brandHeader.style.display = "none";
-    brandContent.style.display = "none";
-    mediaHeader.style.display = "none";
-    brandContent.innerHTML = "";
-    mediaCont.innerHTML = "";
+    if (linglingHeader) linglingHeader.style.display = "block";
+    if (linglingContent) linglingContent.style.display = "grid";
+    if (brandHeader) brandHeader.style.display = "none";
+    if (brandContent) { brandHeader.style.display = "none"; brandContent.innerHTML = ""; }
+    if (mediaHeader) mediaHeader.style.display = "none";
+    if (mediaCont) mediaCont.innerHTML = "";
     renderCards(linglingData, "linglingContent", false, "lingling");
   } else if(currentType === "brand"){
-    linglingHeader.style.display = "none";
-    linglingContent.style.display = "none";
-    brandHeader.style.display = "block";
-    brandContent.style.display = "block";
-    mediaHeader.style.display = "none";
-    linglingContent.innerHTML = "";
-    mediaCont.innerHTML = "";
+    if (linglingHeader) linglingHeader.style.display = "none";
+    if (linglingContent) { linglingContent.style.display = "none"; linglingContent.innerHTML = ""; }
+    if (brandHeader) brandHeader.style.display = "block";
+    if (brandContent) brandContent.style.display = "block";
+    if (mediaHeader) mediaHeader.style.display = "none";
+    if (mediaCont) mediaCont.innerHTML = "";
     renderGroupedBrand(brandData, brandContent);
   } else if(currentType === "media"){
-    linglingHeader.style.display = "none";
-    linglingContent.style.display = "none";
-    brandHeader.style.display = "none";
-    brandContent.style.display = "none";
-    mediaHeader.style.display = "flex";
-    linglingContent.innerHTML = "";
-    brandContent.innerHTML = "";
+    if (linglingHeader) linglingHeader.style.display = "none";
+    if (linglingContent) { linglingContent.style.display = "none"; linglingContent.innerHTML = ""; }
+    if (brandHeader) brandHeader.style.display = "none";
+    if (brandContent) { brandContent.style.display = "none"; brandContent.innerHTML = ""; }
+    if (mediaHeader) mediaHeader.style.display = "flex";
     renderGroupedMedia(mediaData, mediaCont);
   } else {
-    linglingHeader.style.display = "block";
-    linglingContent.style.display = "grid";
-    brandHeader.style.display = "block";
-    brandContent.style.display = "block";
-    mediaHeader.style.display = "flex";
+    if (linglingHeader) linglingHeader.style.display = "block";
+    if (linglingContent) linglingContent.style.display = "grid";
+    if (brandHeader) brandHeader.style.display = "block";
+    if (brandContent) brandContent.style.display = "block";
+    if (mediaHeader) mediaHeader.style.display = "flex";
     renderCards(linglingData, "linglingContent", false, "lingling");
     renderGroupedBrand(brandData, brandContent);
     renderGroupedMedia(mediaData, mediaCont);
@@ -437,10 +429,14 @@ function updateProgressVisuals(){
   let totalPosts = currentDataset.length;
   let reviewedCount = currentDataset.filter(p => reviewed.includes(p.link)).length;
 
-  document.getElementById("reviewCount").innerText = reviewedCount + " / " + totalPosts;
+  if (document.getElementById("reviewCount")) {
+    document.getElementById("reviewCount").innerText = reviewedCount + " / " + totalPosts;
+  }
 
   const percent = totalPosts ? (reviewedCount / totalPosts) * 100 : 0;
-  document.getElementById("progressFill").style.width = percent + "%";
+  if (document.getElementById("progressFill")) {
+    document.getElementById("progressFill").style.width = percent + "%";
+  }
 }
 
 function updateProgress(){
@@ -486,6 +482,7 @@ function createPostQuestHTML(p) {
 
 function renderCards(data, containerId, isCompact, categoryType){
   const container=document.getElementById(containerId);
+  if (!container) return;
   container.innerHTML="";
   const reviewed = getReviewedPosts();
 
@@ -541,6 +538,7 @@ function changeMivPage(platformKey, newPage) {
 }
 
 function renderGroupedBrand(data, container) {
+  if (!container) return;
   container.innerHTML = "";
   const reviewed = getReviewedPosts();
 
@@ -636,6 +634,7 @@ function renderGroupedBrand(data, container) {
 }
 
 function renderGroupedMedia(data, container) {
+  if (!container) return;
   container.innerHTML = "";
 
   const reviewed = getReviewedPosts();
@@ -751,17 +750,17 @@ function renderGroupedMedia(data, container) {
     let paginationHTML = "";
     if (totalPages > 1) {
       paginationHTML += `<div class="pagination">`;
-      paginationHTML += `<button class="page-btn" ${currentPage === 1 ? "disabled" : ""} onclick="changePage('${platformKey}', ${currentPage - 1})"><i class="fa-solid fa-chevron-left"></i></button>`;
+      paginationHTML += `<button class="page-btn" ${currentPage === 1 ? "disabled" : ""} onclick="changeMivPage('${platformKey}', ${currentPage - 1})"><i class="fa-solid fa-chevron-left"></i></button>`;
       
       for (let i = 1; i <= totalPages; i++) {
         if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-          paginationHTML += `<button class="page-btn ${i === currentPage ? "active" : ""}" onclick="changePage('${platformKey}', ${i})">${i}</button>`;
+          paginationHTML += `<button class="page-btn ${i === currentPage ? "active" : ""}" onclick="changeMivPage('${platformKey}', ${i})">${i}</button>`;
         } else if (i === currentPage - 2 || i === currentPage + 2) {
           paginationHTML += `<span style="color:#fff; font-size:11px;">...</span>`;
         }
       }
 
-      paginationHTML += `<button class="page-btn" ${currentPage === totalPages ? "disabled" : ""} onclick="changePage('${platformKey}', ${currentPage + 1})"><i class="fa-solid fa-chevron-right"></i></button>`;
+      paginationHTML += `<button class="page-btn" ${currentPage === totalPages ? "disabled" : ""} onclick="changeMivPage('${platformKey}', ${currentPage + 1})"><i class="fa-solid fa-chevron-right"></i></button>`;
       paginationHTML += `</div>`;
     }
 
@@ -777,11 +776,6 @@ function renderGroupedMedia(data, container) {
 
     container.appendChild(subContainer);
   });
-}
-
-function changePage(platformKey, page) {
-  mivPages[platformKey] = page;
-  render(globalRawDataset);
 }
 
 // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
