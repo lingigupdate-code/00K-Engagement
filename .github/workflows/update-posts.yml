@@ -1,0 +1,25 @@
+name: Update Posts Data Only
+
+on:
+  workflow_dispatch: # กดรันเฉพาะอันนี้ได้จากหน้า Actions
+
+jobs:
+  update-posts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Run Posts Fetch Script
+        run: node scripts/fetch-posts.js # เปลี่ยนเป็นสคริปต์ดึงโพสต์ของคุณ
+
+      - name: Commit and Push Posts
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Manual update: posts data"
+          file_pattern: data-ckss27.json
