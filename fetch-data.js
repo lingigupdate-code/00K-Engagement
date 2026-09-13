@@ -21,9 +21,9 @@ async function fetchAndSave(url, fileName) {
 
 async function updateAllData() {
   let hasError = false;
-  try { await fetchAndSave(URL_INDEX, 'data-index.json'); } catch(e) { hasError = true; }
-  try { await fetchAndSave(URL_PRESENTER, 'data-presenter.json'); } catch(e) { hasError = true; }
-  try { await fetchAndSave(URL_CKSS27, 'data-ckss27.json'); } catch(e) { hasError = true; }
+  try { await fetchAndSave(URL_INDEX, 'data/data-index.json'); } catch(e) { hasError = true; }
+  try { await fetchAndSave(URL_PRESENTER, 'data/data-presenter.json'); } catch(e) { hasError = true; }
+  try { await fetchAndSave(URL_CKSS27, 'data/data-ckss27.json'); } catch(e) { hasError = true; }
 
   if (hasError) process.exit(1);
 }
