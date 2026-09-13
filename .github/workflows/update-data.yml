@@ -1,0 +1,32 @@
+name: Auto Update Data from Google Sheets
+
+on:
+  schedule:
+    # รันอัตโนมัติทุกๆ 3 ชั่วโมง (นาทีที่ 0 ของชั่วโมงที่ 0, 3, 6, 9, 12, 15, 18, 21 UTC)
+    - cron: '0 */3 * * *'
+  workflow_dispatch: # ปุ่มกดสั่งรันมือได้เองใน GitHub
+
+jobs:
+  build-and-update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # ให้สิทธิ์เขียนไฟล์กลับลงใน GitHub
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch Data and Save JSON
+        run: node fetch-data.js
+
+      - name: Commit and Push if updated
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto update data.json [skip ci]" && git push)
