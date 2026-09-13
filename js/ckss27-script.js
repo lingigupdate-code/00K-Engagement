@@ -297,7 +297,7 @@ function render(data){
     if (linglingHeader) linglingHeader.style.display = "block";
     if (linglingContent) linglingContent.style.display = "grid";
     if (brandHeader) brandHeader.style.display = "none";
-    if (brandContent) { brandHeader.style.display = "none"; brandContent.innerHTML = ""; }
+    if (brandContent) { brandContent.style.display = "none"; brandContent.innerHTML = ""; }
     if (mediaHeader) mediaHeader.style.display = "none";
     if (mediaCont) mediaCont.innerHTML = "";
     renderCards(linglingData, "linglingContent", false, "lingling");
@@ -310,18 +310,21 @@ function render(data){
     if (mediaCont) mediaCont.innerHTML = "";
     renderGroupedBrand(brandData, brandContent);
   } else if(currentType === "media"){
+    // 🟢 แก้ไขจุดนี้ให้เปิดการแสดงผล Media Header และ Media Content
     if (linglingHeader) linglingHeader.style.display = "none";
     if (linglingContent) { linglingContent.style.display = "none"; linglingContent.innerHTML = ""; }
     if (brandHeader) brandHeader.style.display = "none";
     if (brandContent) { brandContent.style.display = "none"; brandContent.innerHTML = ""; }
     if (mediaHeader) mediaHeader.style.display = "flex";
+    if (mediaCont) mediaCont.style.display = "block";
     renderGroupedMedia(mediaData, mediaCont);
   } else {
     if (linglingHeader) linglingHeader.style.display = "block";
-    if (linglingContent) linglingContent.style.display = "grid";
+    if (linglingContent) { linglingContent.style.display = "grid"; }
     if (brandHeader) brandHeader.style.display = "block";
-    if (brandContent) brandContent.style.display = "block";
+    if (brandContent) { brandContent.style.display = "block"; }
     if (mediaHeader) mediaHeader.style.display = "flex";
+    if (mediaCont) mediaCont.style.display = "block";
     renderCards(linglingData, "linglingContent", false, "lingling");
     renderGroupedBrand(brandData, brandContent);
     renderGroupedMedia(mediaData, mediaCont);
