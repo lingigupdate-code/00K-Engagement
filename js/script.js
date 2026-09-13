@@ -14,136 +14,39 @@ function updateStatus() {
     document.getElementById("statusText").innerText = label + " • " + currentPlatform;
 }
 
-// คีย์สำหรับเก็บ Cache ของแคปชันและแฮชแท็ก
-const DATA_INDEX_URL = "data-index.json";
-const CACHE_KEY = "00k_index_data_cache";
-const HASHTAGS_CACHE_KEY = "00k_hashtags_only_cache";
-
-// ลิงก์ Apps Script ดึงเฉพาะแฮชแท็กสดๆ (หากต้องการอัปเดตแฮชแท็กบ่อยๆ)
-const HASHTAGS_API_URL = "https://script.google.com/macros/s/AKfycbzDpLJ0f6uCpHARY2pU8EZt5UDO1Bk3LOa_ZG-3llN_TYzrnjWj4AMA7ZZdz8i1pwlk/exec";
-
-// ระบบฐานข้อมูลภายในเครื่อง (IndexedDB)
-const DB_NAME = "00K_Database";
-const STORE_NAME = "captionsStore";
-const DB_VERSION = 1;
-
-const statusEl = document.getElementById("statusText");
-const progressContainer = document.getElementById("progressContainer");
-const progressBar = document.getElementById("progressBar");
-
-function openDatabase() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => resolve(request.result);
-        request.onupgradeneeded = event => {
-            const db = event.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-                db.createObjectStore(STORE_NAME);
-            }
-        };
-    });
-}
-
-function getStoredData() {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const db = await openDatabase();
-            const transaction = db.transaction(STORE_NAME, "readonly");
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.get("appData");
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        } catch (e) {
-            resolve(null);
-        }
-    });
-}
-
-async function saveStoredData(data) {
-    try {
-        const db = await openDatabase();
-        const transaction = db.transaction(STORE_NAME, "readwrite");
-        const store = transaction.objectStore(STORE_NAME);
-        store.put(data, "appData");
-    } catch (e) {
-        console.warn("Could not save to IndexedDB", e);
-    }
-}
-
-// 🎯 1. โหลดข้อมูลแคปชัน (ไม่มีหมดอายุ 3 ชม. ถ้านผู้ใช้ไม่กดอัปเดตเอง)
+// 🎯 โหลดข้อมูลโดยตรงจากตัวแปรใน data-index.js
 async function loadData() {
-    // A. อ่านแคชแคปชันที่มีอยู่ในเครื่องก่อน
-    const cachedData = localStorage.getItem(CACHE_KEY);
-    if (cachedData) {
-        const d = JSON.parse(cachedData);
-        captionsData = d.captions || (Array.isArray(d) ? d : []);
-        hashtagData = d.hashtags || [];
+    let rawData = null;
+
+    if (typeof defaultData !== 'undefined') {
+        rawData = defaultData;
+    } else if (typeof data !== 'undefined') {
+        rawData = data;
+    } else if (typeof captionsData !== 'undefined' && !Array.isArray(captionsData)) {
+        rawData = captionsData;
     }
 
-    // B. อ่านแคชแฮชแท็กฉุกเฉิน (ถ้ามีอัปเดตแยกไว้)
-    const cachedHashtags = localStorage.getItem(HASHTAGS_CACHE_KEY);
-    if (cachedHashtags) {
-        hashtagData = JSON.parse(cachedHashtags);
+    if (rawData) {
+        captionsData = rawData.captions || [];
+        hashtagData = rawData.hashtags || [];
     }
 
-    // C. ถ้ายังไม่มีแคปชันเลย ให้โหลดครั้งแรกสุดจาก data-index.json
-    if (!captionsData || captionsData.length === 0) {
-        await manualUpdateAllData(false); // โหลดแบบเงียบๆ ครั้งแรก
-    } else {
-        theme(currentCampaign);
-        updateStatus();
-        updateDots();
-    }
+    theme(currentCampaign);
+    updateStatus();
+    updateDots();
 }
 
-// 🎯 2. ฟังก์ชันอัปเดตเฉพาะ "แฮชแท็ก" (ดึงสดทันที)
-async function updateHashtagsOnly() {
-    try {
-        console.log("Fetching latest hashtags...");
-        const res = await fetch(DATA_INDEX_URL + "?t=" + Date.now()); // หรือใช้ HASHTAGS_API_URL
-        if (!res.ok) throw new Error("Fetch failed");
-        
-        const d = await res.json();
-        if (d.hashtags && d.hashtags.length > 0) {
-            hashtagData = d.hashtags;
-            localStorage.setItem(HASHTAGS_CACHE_KEY, JSON.stringify(d.hashtags));
-            alert("✅ อัปเดตแฮชแท็กเรียบร้อยแล้ว!");
-        }
-    } catch (err) {
-        console.error("Failed to update hashtags:", err);
-        alert("❌ ไม่สามารถอัปเดตแฮชแท็กได้ กรุณาลองใหม่อีกครั้ง");
-    }
+function updateHashtagsOnly() {
+    loadData();
+    alert("✅ โหลดข้อมูลแฮชแท็กจาก data-index.js เรียบร้อยแล้ว!");
 }
 
-// 🎯 3. ฟังก์ชันสำหรับให้ผู้ใช้กด "อัปเดตแคปชันและข้อมูลทั้งหมด" เองด้วยตัวเอง
-async function manualUpdateAllData(showAlert = true) {
-    try {
-        const res = await fetch(DATA_INDEX_URL + "?v=" + Date.now());
-        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-        const d = await res.json();
-        
-        captionsData = d.captions || (Array.isArray(d) ? d : []);
-        hashtagData = d.hashtags || [];
-
-        // บันทึกลงความจำยาวๆ
-        localStorage.setItem(CACHE_KEY, JSON.stringify(d));
-        localStorage.removeItem(HASHTAGS_CACHE_KEY); // ล้างแคชแฮชแท็กแยกเพื่อให้ใช้ตัวล่าสุดร่วมกัน
-        saveStoredData(d);
-
-        theme(currentCampaign);
-        updateStatus();
-        updateDots();
-
-        if (showAlert) alert("✅ อัปเดตข้อมูลแคปชันและแฮชแท็กทั้งหมดเรียบร้อยแล้ว!");
-    } catch (err) {
-        console.error("Manual update failed:", err);
-        if (showAlert) alert("❌ อัปเดตข้อมูลไม่สำเร็จ กรุณาเช็กการเชื่อมต่ออินเทอร์เน็ต");
-    }
+function manualUpdateAllData() {
+    loadData();
+    alert("✅ โหลดข้อมูลแคปชันและแฮชแท็กจาก data-index.js ใหม่เรียบร้อยแล้ว!");
 }
 
-async function clearCacheAndReload() {
-    indexedDB.deleteDatabase("00K_Database");
+function clearCacheAndReload() {
     localStorage.clear();
     location.reload();
 }
@@ -164,7 +67,7 @@ function spin() {
     if (isSpinning) return;
     
     if (captionsData.length === 0) {
-        alert("ยังไม่มีข้อมูลแคปชัน กรุณากดปุ่มอัปเดตข้อมูลด้านล่าง...");
+        alert("ยังไม่มีข้อมูลแคปชัน กรุณาตรวจสอบไฟล์ data-index.js");
         return;
     }
 
@@ -187,13 +90,21 @@ function spin() {
             const cap = filtered[Math.floor(Math.random() * filtered.length)];
             
             if (includeHashtags) {
-                const tags = hashtagData.find(h => n(h.brand) === n(currentBrand) && n(h.campaign) === n(currentCampaign) && n(h.platform) === n(currentPlatform));
-                el.innerText = cap + (tags && tags.hashtags ? "\n\n" + tags.hashtags : "");
+                const tagsObj = hashtagData.find(h => 
+                    n(h.brand) === n(currentBrand) && 
+                    n(h.campaign) === n(currentCampaign) && 
+                    n(h.platform) === n(currentPlatform)
+                );
+
+                const tagText = tagsObj ? (tagsObj.hashtags || tagsObj.hashtag || "") : "";
+                el.innerText = cap + (tagText ? "\n\n" + tagText : "");
             } else {
                 el.innerText = cap;
             }
             
             isSpinning = false;
+            const progressContainer = document.getElementById("progressContainer");
+            const progressBar = document.getElementById("progressBar");
             if (progressBar) progressBar.style.width = "100%";
             setTimeout(() => { if (progressContainer) progressContainer.style.display = "none"; }, 300);
         }
