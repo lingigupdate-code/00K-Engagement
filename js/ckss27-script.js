@@ -77,7 +77,6 @@ function generateWidgetCaption() {
     return;
   }
 
-  // สุ่มเลือกข้อความ 1 ข้อความทันทีแบบนิ่งๆ ไม่รันวนลูป
   const randomCap = filtered[Math.floor(Math.random() * filtered.length)];
   let finalResult = randomCap;
 
@@ -94,15 +93,25 @@ function generateWidgetCaption() {
 }
 
 function copyWidgetCaption() {
-  const text = document.getElementById('widgetCaptionDisplay').innerText;
+  const display = document.getElementById('widgetCaptionDisplay');
+  if (!display) return;
+  const text = display.innerText;
   if (!text || text.includes("No Found")) return;
   
   navigator.clipboard.writeText(text).then(() => {
     const toast = document.getElementById("toast");
-    toast.classList.add("show");
-    setTimeout(() => toast.classList.remove("show"), 2000);
+    if (toast) {
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2000);
+    }
   });
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadCaptionSourceData();
+  generateWidgetCaption();
+  loadData();
+});
 
 let currentType="all";
 
@@ -129,7 +138,9 @@ function switchType(type){
     document.body.removeAttribute("data-theme");
   }
 
-  loadData();
+  if (globalRawDataset.length > 0) {
+    render(globalRawDataset);
+  }
 }
 
 let player;
@@ -138,74 +149,94 @@ let playerReady = false;
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('bgMusic', {
     events: {
-      'onReady': function() {
+      'onReady': function(event) {
         playerReady = true;
+        event.target.setVolume(100);
       }
     }
   });
 }
 
-function playMusic(){
-  if(playerReady){
-    player.playVideo();
+function playMusic() {
+  if (playerReady && player && typeof player.playVideo === 'function') {
+    const state = player.getPlayerState();
+    if (state === YT.PlayerState.PLAYING) {
+      player.pauseVideo();
+    } else {
+      player.playVideo();
+    }
   } else {
-    console.log("Player not ready yet");
-  }
-}
-
-// ตั้งค่า Cache สำหรับหน้า CKSS27
-const CACHE_KEY = "00k_ckss27_cache";
-const CACHE_TIME_KEY = "00k_ckss27_cache_time";
-const THREE_HOURS = 3 * 60 * 60 * 1000;
-
-// 🎯 ปรับปรุงใหม่: ดึงข้อมูลแคปชันและแฮชแท็กจาก data-index.json โดยตรง
-async function loadCaptionSourceData() {
-  try {
-    const response = await fetch('data-index.json?v=' + Date.now());
-    if (!response.ok) throw new Error("ไม่สามารถโหลดไฟล์ data-index.json ได้");
-    
-    const d = await response.json();
-    globalCaptionsData = d.captions || [];
-    globalHashtagData = d.hashtags || [];
-    
-    // สุ่มแสดงผลใน Widget ทันทีหลังจากโหลดข้อมูลเสร็จ
-    generateWidgetCaption();
-  } catch (err) {
-    console.error("Failed to load caption source data from JSON:", err);
-    const display = document.getElementById('widgetCaptionDisplay');
-    if (display) {
-      display.innerText = "ไม่สามารถโหลดข้อมูลแคปชันได้";
+    const iframe = document.getElementById('bgMusic');
+    if (iframe) {
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
     }
   }
 }
 
-function populatePlatformFilter(data){
-  const select=document.getElementById("platformFilter");
-  if (!select) return;
-  const currentValue=select.value;
-  select.innerHTML='<option value="all">All Platforms</option>';
-  const platforms=[...new Set(data.map(p=>p.platform?.trim()))];
-  platforms.forEach(p=>{
-    if(!p)return;
-    const option=document.createElement("option");
-    option.value=p;
-    option.textContent=p;
-    select.appendChild(option);
+const API_URL = "https://script.google.com/macros/s/AKfycbw9-J4txFdTB8Br0QtkDDeXM2RqmmqBr0n-inRyvMCR79-bv3H4SwttyLzJY7xB5_b1pg/exec";
+
+function loadData(){
+  const linglingCont = document.getElementById("linglingContent");
+  const brandCont = document.getElementById("brandContent");
+  const mediaCont = document.getElementById("mediaContent");
+  
+  if (globalRawDataset.length === 0) {
+    if(linglingCont && linglingCont.innerHTML === "") {
+      linglingCont.innerHTML = `
+        <div class="empty-state">
+          <div class="spinner"></div>
+          <h3>Loading Campaign Data...</h3>
+          <p>Loading.....</p>
+        </div>
+      `;
+    }
+  }
+
+  fetch(API_URL)
+  .then(res => res.json())
+  .then(data => {
+    globalRawDataset = data;
+    populatePlatformFilter(data);
+    render(data);
+  })
+  .catch(err => {
+    if(linglingCont) {
+      linglingCont.innerHTML = `
+        <div class="empty-state">
+          <h3>Awaiting Data Connection</h3>
+          <p>No Found Data</p>
+        </div>
+      `;
+    }
+    if(brandCont) brandCont.innerHTML = "";
+    if(mediaCont) mediaCont.innerHTML = "";
   });
-  select.value=currentValue||"all";
 }
 
-// 🎯 ปรับแต่งการจำแนกหมวดหมู่ย่อยให้รองรับโครงสร้าง JSON ใหม่แบบ 100%
+function populatePlatformFilter(data){
+  const select = document.getElementById("platformFilter");
+  if (!select) return;
+  const currentValue = select.value;
+  select.innerHTML = '<option value="all">All Platforms</option>';
+  const platforms = [...new Set(data.map(p => p.platform?.trim()))];
+  platforms.forEach(p => {
+    if(!p) return;
+    const option = document.createElement("option");
+    option.value = p;
+    option.textContent = p;
+    select.appendChild(option);
+  });
+  select.value = currentValue || "all";
+}
+
 function classifySubCategory(p) {
-  const tabName = (p.sourceTab || p.sheetTab || p.tabName || "").toString().trim().toLowerCase();
+  const tabName = (p.sheetTab || p.sourceTab || p.tabName || "").toString().trim().toLowerCase();
   const type = (p.sheetType || "").toString().trim().toLowerCase();
   
-  // 1. ตรวจสอบว่าเป็นหมวด Media & KOL หรือไม่
-  if (type === "media" || tabName.includes("media") || tabName.includes("kol")) {
+  if (type === "media" || tabName.includes("media") || tabName.includes("kol") || tabName.includes("press")) {
     return "media";
   }
 
-  // 2. ถ้าเป็น Artist / Brand ให้จำแนกว่าเป็น Lingling หรือ Brand Official
   const name = (p.post_name || "").toLowerCase().replace(/\s+/g, "");
   if (name.includes("lingling") || name.includes("linglingkwong") || name.includes("lingsirilak") || name.includes("00k")) {
     return "lingling";
@@ -232,9 +263,8 @@ function sortDataByPlatform(data) {
 }
 
 function render(data){
-
-  const selectedPlatform=document.getElementById("platformFilter") ? document.getElementById("platformFilter").value : "all";
-  const sort=document.getElementById("sortSelect") ? document.getElementById("sortSelect").value : "default";
+  const selectedPlatform = document.getElementById("platformFilter") ? document.getElementById("platformFilter").value : "all";
+  const sort = document.getElementById("sortSelect") ? document.getElementById("sortSelect").value : "sheet_desc";
 
   const uniqueMap = new Map();
   data.forEach(p => {
@@ -253,16 +283,16 @@ function render(data){
     processedData.reverse();
   }
 
-  if(selectedPlatform!=="all"){
-    processedData=processedData.filter(p=>p.platform===selectedPlatform);
+  if(selectedPlatform !== "all"){
+    processedData = processedData.filter(p => p.platform === selectedPlatform);
   }
 
-  processedData.forEach(p=>{
+  processedData.forEach(p => {
     p.eng =
-      Number(p.likes||0) +
-      Number(p.comments||0) +
-      Number(p.shares||0) +
-      Number(p.reposts||0);
+      Number(p.likes || 0) +
+      Number(p.comments || 0) +
+      Number(p.shares || 0) +
+      Number(p.reposts || 0);
   });
 
   const sortFunc = (a, b) => {
@@ -296,37 +326,42 @@ function render(data){
   const mediaCont = document.getElementById("mediaContent");
 
   if(currentType === "lingling"){
-    if (linglingHeader) linglingHeader.style.display = "block";
-    if (linglingContent) linglingContent.style.display = "grid";
-    if (brandHeader) brandHeader.style.display = "none";
-    if (brandContent) { brandContent.style.display = "none"; brandContent.innerHTML = ""; }
-    if (mediaHeader) mediaHeader.style.display = "none";
-    if (mediaCont) mediaCont.innerHTML = "";
+    if(linglingHeader) linglingHeader.style.display = "block";
+    if(linglingContent) {
+      linglingContent.style.display = "grid";
+      linglingContent.className = "grid-horizontal";
+    }
+    if(brandHeader) brandHeader.style.display = "none";
+    if(brandContent) { brandContent.style.display = "none"; brandContent.innerHTML = ""; }
+    if(mediaHeader) mediaHeader.style.display = "none";
+    if(mediaCont) mediaCont.innerHTML = "";
     renderCards(linglingData, "linglingContent", false, "lingling");
   } else if(currentType === "brand"){
-    if (linglingHeader) linglingHeader.style.display = "none";
-    if (linglingContent) { linglingContent.style.display = "none"; linglingContent.innerHTML = ""; }
-    if (brandHeader) brandHeader.style.display = "block";
-    if (brandContent) brandContent.style.display = "block";
-    if (mediaHeader) mediaHeader.style.display = "none";
-    if (mediaCont) mediaCont.innerHTML = "";
+    if(linglingHeader) linglingHeader.style.display = "none";
+    if(linglingContent) { linglingContent.style.display = "none"; linglingContent.innerHTML = ""; }
+    if(brandHeader) brandHeader.style.display = "block";
+    if(brandContent) brandContent.style.display = "block";
+    if(mediaHeader) mediaHeader.style.display = "none";
+    if(mediaCont) mediaCont.innerHTML = "";
     renderGroupedBrand(brandData, brandContent);
   } else if(currentType === "media"){
-    // 🟢 แก้ไขจุดนี้ให้เปิดการแสดงผล Media Header และ Media Content
-    if (linglingHeader) linglingHeader.style.display = "none";
-    if (linglingContent) { linglingContent.style.display = "none"; linglingContent.innerHTML = ""; }
-    if (brandHeader) brandHeader.style.display = "none";
-    if (brandContent) { brandContent.style.display = "none"; brandContent.innerHTML = ""; }
-    if (mediaHeader) mediaHeader.style.display = "flex";
-    if (mediaCont) mediaCont.style.display = "block";
+    if(linglingHeader) linglingHeader.style.display = "none";
+    if(linglingContent) { linglingContent.style.display = "none"; linglingContent.innerHTML = ""; }
+    if(brandHeader) brandHeader.style.display = "none";
+    if(brandContent) { brandContent.style.display = "none"; brandContent.innerHTML = ""; }
+    if(mediaHeader) mediaHeader.style.display = "flex";
+    if(mediaCont) mediaCont.style.display = "block";
     renderGroupedMedia(mediaData, mediaCont);
   } else {
-    if (linglingHeader) linglingHeader.style.display = "block";
-    if (linglingContent) { linglingContent.style.display = "grid"; }
-    if (brandHeader) brandHeader.style.display = "block";
-    if (brandContent) { brandContent.style.display = "block"; }
-    if (mediaHeader) mediaHeader.style.display = "flex";
-    if (mediaCont) mediaCont.style.display = "block";
+    if(linglingHeader) linglingHeader.style.display = "block";
+    if(linglingContent) {
+      linglingContent.style.display = "flex";
+      linglingContent.className = "grid-horizontal";
+    }
+    if(brandHeader) brandHeader.style.display = "block";
+    if(brandContent) brandContent.style.display = "block";
+    if(mediaHeader) mediaHeader.style.display = "flex";
+    if(mediaCont) mediaCont.style.display = "block";
     renderCards(linglingData, "linglingContent", false, "lingling");
     renderGroupedBrand(brandData, brandContent);
     renderGroupedMedia(mediaData, mediaCont);
@@ -393,12 +428,12 @@ function resetProgress() {
   if (confirm("คุณต้องการรีเซ็ตสถานะการเปิดโพสต์ทั้งหมดใช่หรือไม่?")) {
     localStorage.removeItem("reviewedPosts");
     updateProgressVisuals();
-    loadData();
+    if (globalRawDataset.length > 0) render(globalRawDataset);
   }
 }
 
 function handleOpen(element, link, postId){
-  window.open(link,'_blank');
+  window.open(link, '_blank');
   markAsReviewed(postId);
   element.classList.add("opened");
   const btn = element.querySelector("button.action-btn");
@@ -407,26 +442,18 @@ function handleOpen(element, link, postId){
 
 function updateProgressVisuals(){
   const reviewed = getReviewedPosts();
-  
-  const uniqueMap = new Map();
-  globalRawDataset.forEach(p => {
-    const linkKey = String(p.link || "").trim();
-    if (linkKey && !uniqueMap.has(linkKey)) {
-      uniqueMap.set(linkKey, p);
-    }
-  });
-  const currentDataset = Array.from(uniqueMap.values());
+  let totalPosts = globalRawDataset.length;
+  let reviewedCount = globalRawDataset.filter(p => reviewed.includes(p.link)).length;
 
-  let totalPosts = currentDataset.length;
-  let reviewedCount = currentDataset.filter(p => reviewed.includes(p.link)).length;
-
-  if (document.getElementById("reviewCount")) {
-    document.getElementById("reviewCount").innerText = reviewedCount + " / " + totalPosts;
+  const reviewCountEl = document.getElementById("reviewCount");
+  if (reviewCountEl) {
+    reviewCountEl.innerText = reviewedCount + " / " + totalPosts;
   }
 
-  const percent = totalPosts ? (reviewedCount / totalPosts) * 100 : 0;
-  if (document.getElementById("progressFill")) {
-    document.getElementById("progressFill").style.width = percent + "%";
+  const progressFillEl = document.getElementById("progressFill");
+  if (progressFillEl) {
+    const percent = totalPosts ? (reviewedCount / totalPosts) * 100 : 0;
+    progressFillEl.style.width = percent + "%";
   }
 }
 
@@ -472,13 +499,13 @@ function createPostQuestHTML(p) {
 }
 
 function renderCards(data, containerId, isCompact, categoryType){
-  const container=document.getElementById(containerId);
+  const container = document.getElementById(containerId);
   if (!container) return;
-  container.innerHTML="";
+  container.innerHTML = "";
   const reviewed = getReviewedPosts();
 
-  if(!data || data.length===0){
-    container.innerHTML=`
+  if(!data || data.length === 0){
+    container.innerHTML = `
       <div class="empty-state">
         <h3>No Posts Found</h3>
         <p>No Post Found</p>
@@ -487,7 +514,7 @@ function renderCards(data, containerId, isCompact, categoryType){
     return;
   }
 
-  data.forEach(p=>{
+  data.forEach(p => {
     const postId = p.link;
     const isOpened = reviewed.includes(postId);
     const iconURL = getPlatformIcon(p.platform);
@@ -495,7 +522,7 @@ function renderCards(data, containerId, isCompact, categoryType){
     const titleHTML = `
       <div class="platform-title">
         ${iconURL ? `<img class="platform-icon" src="${iconURL}">` : ""}
-        <span>${p.post_name||''}</span>
+        <span>${p.post_name || ''}</span>
       </div>
     `;
 
@@ -520,12 +547,12 @@ function renderCards(data, containerId, isCompact, categoryType){
 
 function changeBrandPage(platformKey, page) {
   brandPages[platformKey] = page;
-  render(globalRawDataset);
+  if (globalRawDataset.length > 0) render(globalRawDataset);
 }
 
 function changeMivPage(platformKey, newPage) {
   mivPages[platformKey] = newPage;
-  render(globalRawDataset); 
+  if (globalRawDataset.length > 0) render(globalRawDataset); 
 }
 
 function renderGroupedBrand(data, container) {
@@ -583,7 +610,7 @@ function renderGroupedBrand(data, container) {
 
       buttonsHTML += `
         <button 
-          class="miv-btn ${isOpened ? "opened" : ""}"
+          class="brand-btn ${isOpened ? "opened" : ""}"
           onclick="handleOpen(this,'${p.link}','${postId}')"
           title="${postName}">
           <span class="badge brand" style="margin:0; font-size:9px; padding:2px 6px;">BRAND</span>
@@ -747,7 +774,7 @@ function renderGroupedMedia(data, container) {
         if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
           paginationHTML += `<button class="page-btn ${i === currentPage ? "active" : ""}" onclick="changeMivPage('${platformKey}', ${i})">${i}</button>`;
         } else if (i === currentPage - 2 || i === currentPage + 2) {
-          paginationHTML += `<span style="color:#fff; font-size:11px;">...</span>`;
+          pagination += `<span style="color:#fff; font-size:11px;">...</span>`;
         }
       }
 
@@ -768,10 +795,3 @@ function renderGroupedMedia(data, container) {
     container.appendChild(subContainer);
   });
 }
-
-// โหลดข้อมูลเมื่อเปิดหน้าเว็บ
-document.addEventListener("DOMContentLoaded", () => {
-  loadCaptionSourceData();
-  generateWidgetCaption();
-  loadData();
-});
