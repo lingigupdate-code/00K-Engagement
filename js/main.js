@@ -14,6 +14,12 @@ function updateStatus() {
     document.getElementById("statusText").innerText = label + " • " + currentPlatform;
 }
 
+// ตั้งค่าที่มาข้อมูล static JSON และระบบ Cache
+const DATA_INDEX_URL = "data-index.json?v=" + Math.floor(Date.now() / (3 * 60 * 60 * 1000));
+const CACHE_KEY = "00k_index_data_cache";
+const CACHE_TIME_KEY = "00k_index_cache_time";
+const THREE_HOURS = 3 * 60 * 60 * 1000;
+
 // ระบบฐานข้อมูลภายในเครื่อง (IndexedDB)
 const DB_NAME = "00K_Database";
 const STORE_NAME = "captionsStore";
@@ -63,46 +69,68 @@ async function saveStoredData(data) {
     }
 }
 
+// ฟังก์ชันดึงข้อมูลฉบับปรับปรุง (อ่าน static JSON + Cache 3 ชม.)
 async function loadData() {
-    // Step A: นำข้อมูลจาก data.js มาแสดงผลทันทีแบบ Instant
+    // Step A: นำข้อมูลจาก data.js มาแสดงผลเบื้องต้นก่อน (Instant)
     let rawData = null;
     if (typeof defaultData !== 'undefined') {
         rawData = defaultData;
     } else if (typeof data !== 'undefined') {
         rawData = data;
-    } else if (typeof captionsData !== 'undefined') {
-        rawData = captionsData;
     }
 
     if (rawData) {
         captionsData = rawData.captions || (Array.isArray(rawData) ? rawData : []);
         hashtagData = rawData.hashtags || [];
-        
         theme(currentCampaign);
         updateStatus();
         updateDots();
     }
 
-    // Step B: ตรวจสอบว่ามีข้อมูลล่าสุดที่เคยเซฟไว้ใน IndexedDB หรือไม่
-    const localData = await getStoredData();
-    if (localData && localData.captions && localData.captions.length > 0) {
-        captionsData = localData.captions;
-        hashtagData = localData.hashtags || [];
+    // Step B: ตรวจสอบ Cache ใน LocalStorage
+    const now = Date.now();
+    const lastFetch = localStorage.getItem(CACHE_TIME_KEY);
+    const cachedData = localStorage.getItem(CACHE_KEY);
+
+    if (cachedData && lastFetch && (now - Number(lastFetch) < THREE_HOURS)) {
+        const d = JSON.parse(cachedData);
+        captionsData = d.captions || (Array.isArray(d) ? d : []);
+        hashtagData = d.hashtags || [];
         theme(currentCampaign);
         updateStatus();
+        updateDots();
+        return;
     }
 
-    // Step C: ดึง Google Sheet เบื้องหลังแบบเงียบๆ
-    fetch("https://script.google.com/macros/s/AKfycbwLXSog_nkbwnrRHBjZ4i35SSYiRmgNNPZL3YeGitAJlDceXYkJw0gLQ9zvc8Ra7ivc6w/exec")
-    .then(r => r.json())
-    .then(d => { 
-        if (d.captions && d.captions.length > 0) {
-            captionsData = d.captions; 
-            hashtagData = d.hashtags || []; 
-            saveStoredData(d);
+    // Step C: ดึงข้อมูลจากไฟล์ data-index.json ที่ GitHub Actions อัปเดตไว้
+    try {
+        const res = await fetch(DATA_INDEX_URL);
+        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+        const d = await res.json();
+        
+        captionsData = d.captions || (Array.isArray(d) ? d : []);
+        hashtagData = d.hashtags || [];
+
+        // บันทึกลง LocalStorage และ IndexedDB สำรองไว้
+        localStorage.setItem(CACHE_KEY, JSON.stringify(d));
+        localStorage.setItem(CACHE_TIME_KEY, now.toString());
+        saveStoredData(d);
+
+        theme(currentCampaign);
+        updateStatus();
+        updateDots();
+    } catch (err) {
+        console.log("Fetch data-index.json failed, falling back to local database:", err);
+        // กรณีดึงไม่สำเร็จ ให้ดึงจาก IndexedDB สำรองเดิม
+        const localData = await getStoredData();
+        if (localData && localData.captions) {
+            captionsData = localData.captions;
+            hashtagData = localData.hashtags || [];
+            theme(currentCampaign);
+            updateStatus();
+            updateDots();
         }
-    })
-    .catch(err => console.log("Background sync skipped/failed:", err));
+    }
 }
 
 async function clearCacheAndReload() {
