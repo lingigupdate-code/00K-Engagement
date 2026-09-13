@@ -20,7 +20,7 @@ const n = t => (t || "").toLowerCase().replace(/\s|_/g, "");
 
 async function loadCaptionSourceData() {
   try {
-    const response = await fetch('data-index.json?v=' + Date.now());
+    const response = await fetch('data/data-index.json?v=' + Date.now());
     if (!response.ok) throw new Error("No Found Data");
     const d = await response.json();
     
@@ -174,7 +174,7 @@ function playMusic() {
   }
 }
 
-const API_URL = "data-ckss27.json";
+const API_URL = "data/data-ckss27.json";
 
 function loadData(){
   const linglingCont = document.getElementById("linglingContent");
