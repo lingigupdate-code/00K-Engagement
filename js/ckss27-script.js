@@ -26,8 +26,6 @@ async function loadCaptionSourceData() {
     
     globalCaptionsData = d.captions || (Array.isArray(d) ? d : (d.items || []));
     globalHashtagData = d.hashtags || [];
-    
-    generateWidgetCaption();
   } catch (err) {
     console.error("Failed to load captions from data-index.json:", err);
   }
@@ -63,10 +61,14 @@ function toggleWidgetHashtags(checkbox) {
 }
 
 function generateWidgetCaption() {
-  loadCaptionSourceData();
   const display = document.getElementById('widgetCaptionDisplay');
   if (!display) return;
   
+  if (!globalCaptionsData || globalCaptionsData.length === 0) {
+    display.innerText = "Loading captions...";
+    return;
+  }
+
   const filtered = globalCaptionsData.filter(c => 
     n(c.brand) === n("CalvinKlein") && n(c.campaign) === n("NYFW")
   ).map(c => c.caption);
@@ -106,8 +108,8 @@ function copyWidgetCaption() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadCaptionSourceData();
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadCaptionSourceData();
   generateWidgetCaption();
   loadData();
 });
@@ -194,7 +196,6 @@ function loadData(){
   fetch(API_URL + "?v=" + Date.now())
   .then(res => res.json())
   .then(data => {
-    // 🟢 รองรับทุกรูปแบบโครงสร้างข้อมูล (ไม่ว่าจะมาเป็น Array ตรงๆ หรือห่อด้วย Object)
     const items = Array.isArray(data) ? data : (data.items || data.posts || data.captions || data.data || []);
     
     globalRawDataset = items;
@@ -777,7 +778,7 @@ function renderGroupedMedia(data, container) {
         if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
           paginationHTML += `<button class="page-btn ${i === currentPage ? "active" : ""}" onclick="changeMivPage('${platformKey}', ${i})">${i}</button>`;
         } else if (i === currentPage - 2 || i === currentPage + 2) {
-          pagination += `<span style="color:#fff; font-size:11px;">...</span>`;
+          paginationHTML += `<span style="color:#fff; font-size:11px;">...</span>`;
         }
       }
 
