@@ -173,7 +173,7 @@ function playMusic() {
   }
 }
 
-const API_URL = "https://script.google.com/macros/s/AKfycbw9-J4txFdTB8Br0QtkDDeXM2RqmmqBr0n-inRyvMCR79-bv3H4SwttyLzJY7xB5_b1pg/exec";
+const API_URL = "data-ckss27.json";
 
 function loadData(){
   const linglingCont = document.getElementById("linglingContent");
