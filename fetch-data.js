@@ -11,6 +11,14 @@ async function fetchAndSave(url, fileName) {
     if (!response.ok) throw new Error(`HTTP status ${response.status}`);
     const text = await response.text();
     const data = JSON.parse(text);
+    
+    // กรณีที่เป็น index สามารถแยกเซฟเป็นสองไฟล์ได้ทันทีถ้าสคริปต์ต้นทางส่งข้อมูลมารวมกัน
+    if (fileName === 'data/data-index.json' && data.captions && data.hashtags) {
+      fs.writeFileSync('data/data-captions.json', JSON.stringify(data.captions, null, 2));
+      fs.writeFileSync('data/data-hashtags.json', JSON.stringify(data.hashtags, null, 2));
+      console.log(`✅ Separated captions and hashtags saved successfully!`);
+    }
+
     fs.writeFileSync(fileName, JSON.stringify(data, null, 2));
     console.log(`✅ ${fileName} saved successfully!`);
   } catch (err) {
