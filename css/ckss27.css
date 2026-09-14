@@ -225,6 +225,8 @@ select option {
   flex: 1;
   min-width: 130px;
   transition: 0.3s;
+  cursor: default !important; /* ป່ຽนเคอร์เซอร์ไม่ให้เป็นรูปมือ */
+  pointer-events: none;      /* ปิดการคลิกหรือตอบสนองต่อเมาส์ทั้งหมด */
 }
 
 .summary-stat-box:hover {
