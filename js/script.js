@@ -41,28 +41,28 @@ async function loadData() {
     }
 }
 
-// 🎯 ฟังก์ชันสำหรับกดอัปเดตข้อมูลทั้งหมดจาก data-index.json
 async function manualUpdateAllData(showAlert = true) {
-    try {
-        const res = await fetch(DATA_INDEX_URL + "?v=" + Date.now());
-        if (!res.ok) throw new Error("ไม่สามารถโหลดไฟล์ data-index.json ได้");
-        
-        const d = await res.json();
-        captionsData = d.captions || [];
-        hashtagData = d.hashtags || [];
+  try {
+    const [resCap, resTag] = await Promise.all([
+      fetch("data/data-captions.json?v=" + Date.now()),
+      fetch("data/data-hashtags.json?v=" + Date.now())
+    ]);
 
-        // บันทึกลง LocalStorage
-        localStorage.setItem(CACHE_KEY, JSON.stringify(d));
+    if (!resCap.ok || !resTag.ok) throw new Error("ไม่สามารถโหลดไฟล์ข้อมูลได้");
 
-        theme(currentCampaign);
-        updateStatus();
-        updateDots();
+    captionsData = await resCap.json();
+    hashtagData = await resTag.json();
 
-        if (showAlert) alert("✅ อัปเดตข้อมูลแคปชันและแฮชแท็กจาก data-index.json สำเร็จ!");
-    } catch (err) {
-        console.error("Failed to load data-index.json:", err);
-        if (showAlert) alert("❌ โหลดข้อมูลไม่สำเร็จ กรุณาตรวจสอบว่ามีไฟล์ data-index.json อยู่ในโปรเจกต์");
-    }
+    // บันทึกลง LocalStorage แบบแยกหรือรวมตามต้องการ
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ captions: captionsData, hashtags: hashtagData }));
+    theme(currentCampaign);
+    updateStatus();
+    updateDots();
+    if (showAlert) alert("✅ อัปเดตข้อมูลสำเร็จ!");
+  } catch (err) {
+    console.error("Failed to load data:", err);
+    if (showAlert) alert("❌ โหลดข้อมูลไม่สำเร็จ");
+  }
 }
 
 // ฟังก์ชันกดอัปเดตเฉพาะแฮชแท็ก (ในกรณีนี้ดึงจากชุดเดียวกัน)
