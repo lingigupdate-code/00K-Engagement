@@ -20,14 +20,17 @@ const n = t => (t || "").toLowerCase().replace(/\s|_/g, "");
 
 async function loadCaptionSourceData() {
   try {
-    const response = await fetch('data/data-index.json?v=' + Date.now());
-    if (!response.ok) throw new Error("No Found Data");
-    const d = await response.json();
+    const [resCaps, resTags] = await Promise.all([
+      fetch('data/data-captions.json?v=' + Date.now()),
+      fetch('data/data-hashtags.json?v=' + Date.now())
+    ]);
+
+    if (!resCaps.ok || !resTags.ok) throw new Error("No Found Data");
     
-    globalCaptionsData = d.captions || (Array.isArray(d) ? d : (d.items || []));
-    globalHashtagData = d.hashtags || [];
+    globalCaptionsData = await resCaps.json();
+    globalHashtagData = await resTags.json();
   } catch (err) {
-    console.error("Failed to load captions from data-index.json:", err);
+    console.error("Failed to load captions or hashtags:", err);
   }
 }
 
