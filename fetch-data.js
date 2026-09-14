@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const URL_INDEX = "https://script.google.com/macros/s/AKfycbwLXSog_nkbwnrRHBjZ4i35SSYiRmgNNPZL3YeGitAJlDceXYkJw0gLQ9zvc8Ra7ivc6w/exec";
+const URL_INDEX = "https://script.google.com/macros/s/AKfycbwKcyf__DV56r-B3O2xE2UR3MSNzu39o-ouRSD9QaZ5oFVnxZ_oCGHLQ0vstPhwkDQtjQ/exec";
 const URL_PRESENTER = "https://script.google.com/macros/s/AKfycbwRqfz1_LcXiCEPZHmycmw563Yf5yRRau-T9cl_eZYNbBmW-R18pyHH1jAenfNp5Sse/exec";
 const URL_CKSS27 = "https://script.google.com/macros/s/AKfycbz40MAsO2k63Ce-LwSUcOOYIqignSJie9Ih6DfmZv28gQF9124nnuNPreuLLGYzsS0HBQ/exec";
 
