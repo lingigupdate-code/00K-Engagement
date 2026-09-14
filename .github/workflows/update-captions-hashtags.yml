@@ -1,0 +1,41 @@
+name: Update Captions & Hashtags Manually
+
+on:
+  workflow_dispatch: # กดรันมือผ่านหน้า GitHub Actions
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Fetch and Save Captions & Hashtags
+        run: |
+          node -e '
+          const fs = require("fs");
+          const URL_INDEX = "https://script.google.com/macros/s/AKfycbwKcyf__DV56r-B3O2xE2UR3MSNzu39o-ouRSD9QaZ5oFVnxZ_oCGHLQ0vstPhwkDQtjQ/exec";
+          async function run() {
+            const res = await fetch(URL_INDEX, { redirect: "follow" });
+            const data = await res.json();
+            
+            if (data.captions) {
+              fs.writeFileSync("data/data-captions.json", JSON.stringify(data.captions, null, 2));
+              console.log("✅ data-captions.json updated!");
+            }
+            if (data.hashtags) {
+              fs.writeFileSync("data/data-hashtags.json", JSON.stringify(data.hashtags, null, 2));
+              console.log("✅ data-hashtags.json updated!");
+            }
+          }
+          run();
+          '
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Manual update captions and hashtags"
+          file_pattern: |
+            data/data-captions.json
+            data/data-hashtags.json
