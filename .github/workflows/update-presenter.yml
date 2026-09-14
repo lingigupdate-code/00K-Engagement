@@ -1,0 +1,32 @@
+name: Update Presenter Data Manually
+
+on:
+  workflow_dispatch: # กดรันมือผ่านหน้า GitHub Actions เท่านั้น
+
+jobs:
+  update-presenter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Fetch and Save Presenter
+        run: |
+          node -e '
+          const fs = require("fs");
+          const URL_PRESENTER = "https://script.google.com/macros/s/AKfycbwRqfz1_LcXiCEPZHmycmw563Yf5yRRau-T9cl_eZYNbBmW-R18pyHH1jAenfNp5Sse/exec";
+          async function run() {
+            const res = await fetch(URL_PRESENTER, { redirect: "follow" });
+            const data = await res.json();
+            fs.writeFileSync("data/data-presenter.json", JSON.stringify(data, null, 2));
+            console.log("✅ data-presenter.json updated!");
+          }
+          run();
+          '
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Manual update data-presenter.json"
+          file_pattern: data/data-presenter.json
