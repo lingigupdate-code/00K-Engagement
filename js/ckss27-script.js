@@ -409,14 +409,11 @@ function renderSummary(dataset){
   // 2. ตัดโพสต์แรกออกด้วย slice(1) ตามเงื่อนไขที่ไม่เอาโพสต์แรก
   let linglingPostsToCalc = linglingPosts.slice(1);
 
-  // 3. รวมค่า Engagement เฉพาะโพสต์ที่เหลือ
-  linglingPostsToCalc.forEach(p => {
-    // 3. รวมเฉพาะยอดไลค์และยอดวิวเฉพาะโพสต์ที่เหลือ
+  // 3. รวมเฉพาะยอดไลค์และยอดวิวเฉพาะโพสต์ที่เหลือ
   linglingPostsToCalc.forEach(p => {
     const likes = Number(p.likes || 0);
     const views = Number(p.views || 0);
-    const eng = Number(p.likes || 0) + Number(p.comments || 0) + Number(p.shares || 0) + Number(p.reposts || 0);
-    linglingTotalEng += eng;
+    linglingTotalEng += (likes + views);
   });
 
   dataset.forEach(p => {
