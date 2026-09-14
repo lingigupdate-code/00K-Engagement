@@ -394,11 +394,34 @@ function renderSummary(dataset){
   let linglingCount = 0;
   let brandCount = 0;
   let mediaCount = 0;
+  let linglingTotalEng = 0;
+
+  // 1. กรองเฉพาะโพสต์ของ lingling และเอาเฉพาะแพลตฟอร์ม Instagram (ไม่เอา TikTok)
+  let linglingPosts = dataset.filter(p => {
+    const isLingling = classifySubCategory(p) === "lingling";
+    const plat = (p.platform || "").toLowerCase();
+    const isInstagram = plat.includes("instagram") || plat.includes("ig");
+    return isLingling && isInstagram;
+  });
+
+  linglingCount = linglingPosts.length;
+
+  // 2. ตัดโพสต์แรกออกด้วย slice(1) ตามเงื่อนไขที่ไม่เอาโพสต์แรก
+  let linglingPostsToCalc = linglingPosts.slice(1);
+
+  // 3. รวมค่า Engagement เฉพาะโพสต์ที่เหลือ
+  linglingPostsToCalc.forEach(p => {
+    // 3. รวมเฉพาะยอดไลค์และยอดวิวเฉพาะโพสต์ที่เหลือ
+  linglingPostsToCalc.forEach(p => {
+    const likes = Number(p.likes || 0);
+    const views = Number(p.views || 0);
+    const eng = Number(p.likes || 0) + Number(p.comments || 0) + Number(p.shares || 0) + Number(p.reposts || 0);
+    linglingTotalEng += eng;
+  });
 
   dataset.forEach(p => {
     const sub = classifySubCategory(p);
-    if(sub === "lingling") linglingCount++;
-    else if(sub === "brand") brandCount++;
+    if(sub === "brand") brandCount++;
     else if(sub === "media") mediaCount++;
   });
 
@@ -406,6 +429,11 @@ function renderSummary(dataset){
     document.getElementById("countLingling").innerText = linglingCount.toLocaleString();
     document.getElementById("countBrand").innerText = brandCount.toLocaleString();
     document.getElementById("countMedia").innerText = mediaCount.toLocaleString();
+  }
+
+  const engEl = document.getElementById("linglingTotalEng");
+  if (engEl) {
+    engEl.innerText = linglingTotalEng.toLocaleString();
   }
 }
 
