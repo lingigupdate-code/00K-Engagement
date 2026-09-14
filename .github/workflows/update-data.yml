@@ -25,7 +25,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto-update posts data"
-          file_pattern: data-ckss27.json
+          file_pattern: data/data-ckss27.json
 
   update-captions:
     name: Update Captions Data
@@ -46,7 +46,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto-update captions data"
-          file_pattern: data-captions.json
+          file_pattern: data/data-captions.json
 
   update-hashtags:
     name: Update Hashtags Data
@@ -67,4 +67,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto-update hashtags data"
-          file_pattern: data-hashtags.json
+          file_pattern: data/data-hashtags.json
