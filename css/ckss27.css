@@ -198,6 +198,69 @@ select option {
   margin-bottom: 0;
 }
 
+/* ================= SUMMARY STATS CARDS (สำหรับแยก Likes, Views, Total) ================= */
+.summary-stats-container {
+  width: 92%;
+  max-width: 1200px;
+  margin: 0 auto 20px;
+  background: var(--card);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  display: flex;
+  justify-content: space-around;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.summary-stat-box {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px 14px;
+  text-align: center;
+  flex: 1;
+  min-width: 130px;
+  transition: 0.3s;
+}
+
+.summary-stat-box:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.summary-stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.summary-stat-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+@media(max-width: 750px) {
+  .summary-stats-container {
+    padding: 12px 10px;
+  }
+  .summary-stat-box {
+    padding: 8px 6px;
+    min-width: 100px;
+  }
+  .summary-stat-value {
+    font-size: 13px;
+  }
+}
+
 /* ================= SECTION HEADINGS ================= */
 
 .section-container {
