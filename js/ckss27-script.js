@@ -280,8 +280,7 @@ function sortDataByPlatform(data) {
   });
 }
 
-function render(data){
-  const selectedPlatform = document.getElementById("platformFilter") ? document.getElementById("platformFilter").value : "all";
+const selectedPlatform = document.getElementById("platformFilter") ? document.getElementById("platformFilter").value : "all";
   const sort = document.getElementById("sortSelect") ? document.getElementById("sortSelect").value : "sheet_desc";
 
   const uniqueMap = new Map();
@@ -294,6 +293,7 @@ function render(data){
   data = Array.from(uniqueMap.values());
 
   renderSummary(data);
+  updateLastUpdatedTime(); // <--- เพิ่มบรรทัดนี้ลงไปตรงนี้ครับ
 
   let processedData = [...data];
 
