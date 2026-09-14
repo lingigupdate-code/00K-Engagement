@@ -394,6 +394,8 @@ function renderSummary(dataset){
   let linglingCount = 0;
   let brandCount = 0;
   let mediaCount = 0;
+  let linglingLikes = 0;
+  let linglingViews = 0;
   let linglingTotalEng = 0;
 
   // 1. กรองเฉพาะโพสต์ของ lingling และเอาเฉพาะแพลตฟอร์ม Instagram (ไม่เอา TikTok)
@@ -406,14 +408,22 @@ function renderSummary(dataset){
 
   linglingCount = linglingPosts.length;
 
-  // 2. ตัดโพสต์แรกออกด้วย slice(1) ตามเงื่อนไขที่ไม่เอาโพสต์แรก
+  // 2. ตัดโพสต์แรกออกด้วย slice(1)
   let linglingPostsToCalc = linglingPosts.slice(1);
 
-  // 3. รวมเฉพาะยอดไลค์และยอดวิวเฉพาะโพสต์ที่เหลือ
+  // 3. คำนวณแยกแต่ละตัวแปร
   linglingPostsToCalc.forEach(p => {
     const likes = Number(p.likes || 0);
+    const comments = Number(p.comments || 0);
+    const shares = Number(p.shares || 0);
+    const reposts = Number(p.reposts || 0);
     const views = Number(p.views || 0);
-    linglingTotalEng += (likes + views);
+
+    linglingLikes += likes;
+    linglingViews += views;
+    
+    // Total คำนวณจาก Engagement ทั้งหมดรวมกัน (Likes + Comments + Shares + Reposts + Views)
+    linglingTotalEng += (likes + comments + shares + reposts + views);
   });
 
   dataset.forEach(p => {
@@ -428,10 +438,14 @@ function renderSummary(dataset){
     document.getElementById("countMedia").innerText = mediaCount.toLocaleString();
   }
 
-  const engEl = document.getElementById("linglingTotalEng");
-  if (engEl) {
-    engEl.innerText = linglingTotalEng.toLocaleString();
-  }
+  // อัปเดตค่าแสดงผลแยกแต่ละช่องตามหน้า engagement.html
+  const likesEl = document.getElementById("linglingTotalLikes");
+  const viewsEl = document.getElementById("linglingTotalViews");
+  const combinedEl = document.getElementById("linglingTotalCombined");
+
+  if (likesEl) likesEl.innerText = linglingLikes.toLocaleString();
+  if (viewsEl) viewsEl.innerText = linglingViews.toLocaleString();
+  if (combinedEl) combinedEl.innerText = linglingTotalEng.toLocaleString();
 }
 
 function getPlatformIcon(platform){
