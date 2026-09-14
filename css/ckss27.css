@@ -854,8 +854,8 @@ input:checked + .slider-toggle {
 }
 
 input:checked + .slider-toggle:before {
-  transform: translateX(14px);
-  background-color: #000;
+  transform: translateX(14px); 
+  background-color: #000; /* หรือสีตามธีม */
 }
 
 .widget-caption-box {
