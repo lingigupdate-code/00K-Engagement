@@ -1,0 +1,17 @@
+name: Update ckss27
+on:
+  schedule:
+    - cron: '0 */1 * * *'
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: node fetch-file1.js
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update ckss27"
+          file_pattern: data/data-ckss27.json
