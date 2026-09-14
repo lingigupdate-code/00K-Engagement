@@ -2,12 +2,12 @@ name: Update All Campaign Data
 
 on:
   schedule:
-    - cron: '0 */1 * * *' # รันทุกๆ 3 ชั่วโมง
-  workflow_dispatch:      # กดรันมือเองได้จากหน้า GitHub
+    - cron: '0 */1 * * *'
+  workflow_dispatch:
 
 jobs:
-  update-posts:
-    name: Update Posts Data
+  update-data:
+    name: Run Fetch Data Script
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -18,53 +18,11 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Run Posts Fetch Script
-        run: node scripts/fetch-posts.js # สคริปต์ดึงข้อมูลโพสต์หลักไปเซฟเป็น data-ckss27.json
+      - name: Run Fetch Script
+        run: node fetch-data.js
 
-      - name: Commit and Push Posts
+      - name: Commit and Push Updated Data
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Auto-update posts data"
-          file_pattern: data/data-ckss27.json
-
-  update-captions:
-    name: Update Captions Data
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Run Captions Fetch Script
-        run: node scripts/fetch-captions.js # สคริปต์ดึงแคปชันไปเซฟเป็น data-captions.json
-
-      - name: Commit and Push Captions
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Auto-update captions data"
-          file_pattern: data/data-captions.json
-
-  update-hashtags:
-    name: Update Hashtags Data
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Run Hashtags Fetch Script
-        run: node scripts/fetch-hashtags.js # สคริปต์ดึงแฮชแท็กไปเซฟเป็น data-hashtags.json
-
-      - name: Commit and Push Hashtags
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Auto-update hashtags data"
-          file_pattern: data/data-hashtags.json
+          commit_message: "Auto-update all campaign data"
+          file_pattern: data/*.json
