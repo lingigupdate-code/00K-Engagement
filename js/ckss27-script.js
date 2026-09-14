@@ -179,21 +179,31 @@ function playMusic() {
 
 const API_URL = "data/data-ckss27.json";
 
+const CACHE_KEY_CKSS27 = "cache_ckss27_posts";
+
 function loadData(){
   const linglingCont = document.getElementById("linglingContent");
   const brandCont = document.getElementById("brandContent");
   const mediaCont = document.getElementById("mediaContent");
   
-  if (globalRawDataset.length === 0) {
-    if(linglingCont && linglingCont.innerHTML === "") {
-      linglingCont.innerHTML = `
-        <div class="empty-state">
-          <div class="spinner"></div>
-          <h3>Loading Campaign Data...</h3>
-          <p>Loading.....</p>
-        </div>
-      `;
+  const cachedData = localStorage.getItem(CACHE_KEY_CKSS27);
+  if (cachedData) {
+    try {
+      const items = JSON.parse(cachedData);
+      globalRawDataset = items;
+      populatePlatformFilter(items);
+      render(items);
+    } catch (e) {
+      console.error("Cache parse error", e);
     }
+  } else if(linglingCont && linglingCont.innerHTML === "") {
+    linglingCont.innerHTML = `
+      <div class="empty-state">
+        <div class="spinner"></div>
+        <h3>Loading Campaign Data...</h3>
+        <p>Loading.....</p>
+      </div>
+    `;
   }
 
   fetch(API_URL + "?v=" + Date.now())
@@ -202,12 +212,13 @@ function loadData(){
     const items = Array.isArray(data) ? data : (data.items || data.posts || data.captions || data.data || []);
     
     globalRawDataset = items;
+    localStorage.setItem(CACHE_KEY_CKSS27, JSON.stringify(items));
     populatePlatformFilter(items);
     render(items);
   })
   .catch(err => {
     console.error("Error loading data-ckss27.json:", err);
-    if(linglingCont) {
+    if(!cachedData && linglingCont) {
       linglingCont.innerHTML = `
         <div class="empty-state">
           <h3>Awaiting Data Connection</h3>
@@ -215,8 +226,10 @@ function loadData(){
         </div>
       `;
     }
-    if(brandCont) brandCont.innerHTML = "";
-    if(mediaCont) mediaCont.innerHTML = "";
+    if(!cachedData) {
+      if(brandCont) brandCont.innerHTML = "";
+      if(mediaCont) mediaCont.innerHTML = "";
+    }
   });
 }
 
@@ -533,7 +546,7 @@ function renderCards(data, containerId, isCompact, categoryType){
       </div>
     `;
 
-    const imageHTML = p.thumbnail ? `<img class="post-img" src="${p.thumbnail || ''}">` : "";
+    const imageHTML = p.thumbnail ? `<img class="post-img" src="${p.thumbnail || ''}" loading="lazy">` : "";
     const postQuestHTML = createPostQuestHTML(p);
 
     container.innerHTML += `
