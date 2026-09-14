@@ -280,7 +280,8 @@ function sortDataByPlatform(data) {
   });
 }
 
-const selectedPlatform = document.getElementById("platformFilter") ? document.getElementById("platformFilter").value : "all";
+function render(data){
+  const selectedPlatform = document.getElementById("platformFilter") ? document.getElementById("platformFilter").value : "all";
   const sort = document.getElementById("sortSelect") ? document.getElementById("sortSelect").value : "sheet_desc";
 
   const uniqueMap = new Map();
@@ -293,7 +294,7 @@ const selectedPlatform = document.getElementById("platformFilter") ? document.ge
   data = Array.from(uniqueMap.values());
 
   renderSummary(data);
-  updateLastUpdatedTime(); // <--- เพิ่มบรรทัดนี้ลงไปตรงนี้ครับ
+  updateLastUpdatedTime(); // เรียกอัปเดตเวลาตรงนี้ทำงานถูกต้องแล้วครับ
 
   let processedData = [...data];
 
