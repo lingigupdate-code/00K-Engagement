@@ -854,3 +854,25 @@ function renderGroupedMedia(data, container) {
     container.appendChild(subContainer);
   });
 }
+
+function updateLastUpdatedTime() {
+  const timeEl = document.getElementById("lastUpdatedTime");
+  if (!timeEl) return;
+  
+  const now = new Date();
+  const timeString = now.toLocaleTimeString('en-US', { 
+    timeZone: 'Asia/Bangkok', 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    second: '2-digit',
+    hour12: true 
+  });
+  const dateString = now.toLocaleDateString('en-US', { 
+    timeZone: 'Asia/Bangkok', 
+    month: 'short', 
+    day: 'numeric', 
+    year: 'numeric' 
+  });
+  
+  timeEl.innerText = `${dateString}, ${timeString} (Bangkok)`;
+}
