@@ -142,9 +142,7 @@ function switchType(type){
     document.body.removeAttribute("data-theme");
   }
 
-  if (globalRawDataset.length > 0) {
-    render(globalRawDataset);
-  }
+  loadData();
 }
 
 let player;
