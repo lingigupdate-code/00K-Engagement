@@ -690,6 +690,17 @@ button.miv-btn:hover {
   border-color: rgba(255, 255, 255, 0.25);
 }
 
+button.brand-btn.opened {
+    background: rgba(46, 125, 50, 0.35) !important;
+    border-color: #2E7D32 !important;
+    color: #fff !important;
+}
+
+button.brand-btn.opened::after {
+    content: " ✓";
+    font-weight: 700;
+}
+
 button.miv-btn.opened {
   background: rgba(46, 125, 50, 0.35) !important;
   border-color: #2E7D32 !important;
