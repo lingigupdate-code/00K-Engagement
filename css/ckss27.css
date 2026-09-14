@@ -303,6 +303,31 @@ select option {
 @media(max-width:600px){ .grid-compact{grid-template-columns:repeat(2,1fr); gap: 6px;} }
 @media(max-width:380px){ .grid-compact{grid-template-columns:1fr; gap: 6px;} }
 
+.grid-horizontal {
+  display: flex !important;
+  overflow-x: auto;
+  gap: 16px;
+  padding-bottom: 15px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.grid-horizontal .card {
+  min-width: 300px;
+  max-width: 320px;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+/* ซ่อน Scrollbar ด้านล่างเพื่อให้ดูสะอาดตา (เลือกเปิด/ปิดได้) */
+.grid-horizontal::-webkit-scrollbar {
+  height: 6px;
+}
+.grid-horizontal::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
 .card{
   background:var(--card);
   backdrop-filter: blur(15px);
