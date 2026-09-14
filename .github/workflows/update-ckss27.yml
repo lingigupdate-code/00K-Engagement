@@ -1,7 +1,10 @@
-name: Update ckss27
+name: Update CKSS27 Data Only
+
 on:
   schedule:
     - cron: '0 */1 * * *'
+  workflow_dispatch:
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -10,8 +13,23 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
-      - run: node fetch-file1.js
+          
+      # สร้างสคริปต์ย่อยสั่งเฉพาะตัว CKSS27 จากไฟล์หลัก หรือเขียนเรียกฟังก์ชันแยกเฉพาะกิจใน Workflow ได้เลย
+      - name: Fetch only CKSS27
+        run: |
+          node -e '
+          const fs = require("fs");
+          const URL_CKSS27 = "https://script.google.com/macros/s/AKfycbz40MAsO2k63Ce-LwSUcOOYIqignSJie9Ih6DfmZv28gQF9124nnuNPreuLLGYzsS0HBQ/exec";
+          async function run() {
+            const res = await fetch(URL_CKSS27, { redirect: "follow" });
+            const data = await res.json();
+            fs.writeFileSync("data/data-ckss27.json", JSON.stringify(data, null, 2));
+            console.log("✅ data-ckss27.json updated!");
+          }
+          run();
+          '
+
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Update ckss27"
+          commit_message: "Auto-update ckss27 data only"
           file_pattern: data/data-ckss27.json
