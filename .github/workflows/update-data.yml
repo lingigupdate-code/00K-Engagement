@@ -1,9 +1,7 @@
 name: Update All Campaign Data
 
 on:
-  schedule:
-    - cron: '0 */1 * * *'
-  workflow_dispatch:
+  workflow_dispatch: # กดรันมือผ่านหน้า GitHub Actions เท่านั้น
 
 jobs:
   update-data:
