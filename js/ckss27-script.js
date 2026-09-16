@@ -211,30 +211,34 @@ function loadData(){
             const items = Array.isArray(data) ? data : (data.items || data.posts || data.captions || data.data || []);
             globalRawDataset = items;
 
-            // ดึงค่าเวลาจากแถวบนสุด (items[0])
-            if (items.length > 0) {
-                const rawTime = items[0].last_update || items[0].timestamp || items[0].time;
-                if (rawTime) {
-                    const dateObj = new Date(rawTime);
-                    if (!isNaN(dateObj.getTime())) {
-                        window.lastFetchedTime = dateObj.toLocaleString('th-TH', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit',
-                            hour12: false
-                        });
-                    } else {
-                        window.lastFetchedTime = rawTime;
-                    }
+            // --- ดึงเวลาจากแถวแรกสุด (items[0]) ตัวเดียว ---
+            if (items.length > 0 && items[0].last_update) {
+                const dateObj = new Date(items[0].last_update);
+                if (!isNaN(dateObj.getTime())) {
+                    window.lastFetchedTime = dateObj.toLocaleString('th-TH', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false
+                    });
+                } else {
+                    window.lastFetchedTime = items[0].last_update;
                 }
+            } else {
+                const now = new Date();
+                window.lastFetchedTime = now.toLocaleDateString('th-TH', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+                });
             }
+            // ----------------------------------------------------
           
             localStorage.setItem(CACHE_KEY_CKSS27, JSON.stringify(items));
             populatePlatformFilter(items);
-            render(items); // render จะเรียก updateLastUpdatedTime() ต่อให้อัตโนมัติ
+            render(items); 
         })
         .catch(err => {
             console.error("Error loading data from Google Sheets:", err);
