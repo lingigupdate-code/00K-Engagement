@@ -212,13 +212,28 @@ function loadData(){
             globalRawDataset = items;
             // ---- ดึงค่าเวลาจากแถวบนสุด (items[0]) ช่องเดียว ----
             if (items.length > 0) {
-                // เปลี่ยนคำว่า "timestamp" หรือ "last_update" ให้ตรงกับหัวคอลัมน์จริงใน Google Sheet
-                const topRowTime = items[0].timestamp || items[0].last_update || items[0].time;
-                
-                if (topRowTime) {
+                // ดึงค่าจาก field last_update ที่มีอยู่ใน JSON จริงๆ
+                const rawTime = items[0].last_update || items[0].timestamp || items[0].time;
+                if (rawTime) {
+                    // แปลงรูปแบบ ISO string ให้เป็นเวลาไทยที่อ่านง่าย (เช่น 16/09/2026, 18:01:12)
+                    const dateObj = new Date(rawTime);
+                    if (!isNaN(dateObj.getTime())) {
+                        window.lastFetchedTime = dateObj.toLocaleString('th-TH', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: false
+                        });
+                    } else {
+                        window.lastFetchedTime = rawTime;
+                    }
+
                     const timeEl = document.getElementById("lastUpdatedTime");
                     if (timeEl) {
-                        timeEl.innerText = topRowTime;
+                        timeEl.innerText = window.lastFetchedTime;
                     }
                 }
             }
