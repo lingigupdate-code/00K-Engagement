@@ -210,12 +210,11 @@ function loadData(){
         .then(data => {
             const items = Array.isArray(data) ? data : (data.items || data.posts || data.captions || data.data || []);
             globalRawDataset = items;
-            // ---- ดึงค่าเวลาจากแถวบนสุด (items[0]) ช่องเดียว ----
+
+            // ดึงค่าเวลาจากแถวบนสุด (items[0])
             if (items.length > 0) {
-                // ดึงค่าจาก field last_update ที่มีอยู่ใน JSON จริงๆ
                 const rawTime = items[0].last_update || items[0].timestamp || items[0].time;
                 if (rawTime) {
-                    // แปลงรูปแบบ ISO string ให้เป็นเวลาไทยที่อ่านง่าย (เช่น 16/09/2026, 18:01:12)
                     const dateObj = new Date(rawTime);
                     if (!isNaN(dateObj.getTime())) {
                         window.lastFetchedTime = dateObj.toLocaleString('th-TH', {
@@ -230,18 +229,12 @@ function loadData(){
                     } else {
                         window.lastFetchedTime = rawTime;
                     }
-
-                    const timeEl = document.getElementById("lastUpdatedTime");
-                    if (timeEl) {
-                        timeEl.innerText = window.lastFetchedTime;
-                    }
                 }
             }
-            // ----------------------------------------------------
           
             localStorage.setItem(CACHE_KEY_CKSS27, JSON.stringify(items));
             populatePlatformFilter(items);
-            render(items);
+            render(items); // render จะเรียก updateLastUpdatedTime() ต่อให้อัตโนมัติ
         })
         .catch(err => {
             console.error("Error loading data from Google Sheets:", err);
@@ -887,12 +880,9 @@ async function updateLastUpdatedTime() {
     const timeEl = document.getElementById("lastUpdatedTime");
     if (!timeEl) return;
 
-    // ถ้ามีค่าเวลาที่ดึงมาจาก Google Sheet ตอนโหลดข้อมูลแล้ว ให้เอามาแสดงผลเลย
     if (window.lastFetchedTime) {
         timeEl.innerText = window.lastFetchedTime;
-        return;
+    } else {
+        timeEl.innerText = "Loading time...";
     }
-
-    // กรณีสำรอง: ถ้ายังไม่มี ให้แสดงข้อความรอข้อมูล
-    timeEl.innerText = "Waiting for data...";
 }
