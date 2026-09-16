@@ -175,7 +175,7 @@ function playMusic() {
   }
 }
 
-const API_URL = "data/data-ckss27.json";
+const URL_CKSS27 = "https://script.google.com/macros/s/AKfycbz40MAsO2k63Ce-LwSUcOOYIqignSJie9Ih6DfmZv28gQF9124nnuNPreuLLGYzsS0HBQ/exec";
 
 const CACHE_KEY_CKSS27 = "cache_ckss27_posts";
 
