@@ -210,15 +210,19 @@ function loadData(){
         .then(data => {
             const items = Array.isArray(data) ? data : (data.items || data.posts || data.captions || data.data || []);
             globalRawDataset = items;
-            // ---- [เพิ่มตรงนี้] นำเวลาที่ดึงมาจาก API (Google Sheet) ไปแสดงผลที่หน้าจอ ----
-            if (data.lastUpdated) {
-                const timeEl = document.getElementById("lastUpdatedTime");
-                if (timeEl) {
-                    timeEl.innerText = data.lastUpdated;
+            // ---- ดึงค่าเวลาจากแถวบนสุด (items[0]) ช่องเดียว ----
+            if (items.length > 0) {
+                // เปลี่ยนคำว่า "timestamp" หรือ "last_update" ให้ตรงกับหัวคอลัมน์จริงใน Google Sheet
+                const topRowTime = items[0].timestamp || items[0].last_update || items[0].time;
+                
+                if (topRowTime) {
+                    const timeEl = document.getElementById("lastUpdatedTime");
+                    if (timeEl) {
+                        timeEl.innerText = topRowTime;
+                    }
                 }
             }
-            // -------------------------------------------------------------------
-
+            // ----------------------------------------------------
           
             localStorage.setItem(CACHE_KEY_CKSS27, JSON.stringify(items));
             populatePlatformFilter(items);
