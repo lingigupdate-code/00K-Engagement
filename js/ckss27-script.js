@@ -869,37 +869,15 @@ function renderGroupedMedia(data, container) {
 }
 
 async function updateLastUpdatedTime() {
-  const timeEl = document.getElementById("lastUpdatedTime");
-  if (!timeEl) return;
-  
-  try {
-    const response = await fetch("https://api.github.com/repos/lingigupdate-code/00K-Engagement/commits?path=data/data-ckss27.json&per_page=1");
-    if (!response.ok) throw new Error("API error");
-    
-    const commits = await response.json();
-    if (commits && commits.length > 0) {
-      const commitDate = new Date(commits[0].commit.committer.date);
-      
-      const timeString = commitDate.toLocaleTimeString('en-US', { 
-        timeZone: 'Asia/Bangkok', 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit',
-        hour12: true 
-      });
-      const dateString = commitDate.toLocaleDateString('en-US', { 
-        timeZone: 'Asia/Bangkok', 
-        month: 'short', 
-        day: 'numeric', 
-        year: 'numeric' 
-      });
-      
-      timeEl.innerText = `${dateString}, ${timeString} (Bangkok)`;
-    } else {
-      timeEl.innerText = "No update data";
+    const timeEl = document.getElementById("lastUpdatedTime");
+    if (!timeEl) return;
+
+    // ถ้ามีค่าเวลาที่ดึงมาจาก Google Sheet ตอนโหลดข้อมูลแล้ว ให้เอามาแสดงผลเลย
+    if (window.lastFetchedTime) {
+        timeEl.innerText = window.lastFetchedTime;
+        return;
     }
-  } catch (err) {
-    console.error("Failed to fetch last commit time:", err);
-    timeEl.innerText = "Unable to load time";
-  }
+
+    // กรณีสำรอง: ถ้ายังไม่มี ให้แสดงข้อความรอข้อมูล
+    timeEl.innerText = "Waiting for data...";
 }
