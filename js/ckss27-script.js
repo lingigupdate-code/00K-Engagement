@@ -180,55 +180,55 @@ const URL_CKSS27 = "https://script.google.com/macros/s/AKfycbz40MAsO2k63Ce-LwSUc
 const CACHE_KEY_CKSS27 = "cache_ckss27_posts";
 
 function loadData(){
-  const linglingCont = document.getElementById("linglingContent");
-  const brandCont = document.getElementById("brandContent");
-  const mediaCont = document.getElementById("mediaContent");
-  
-  const cachedData = localStorage.getItem(CACHE_KEY_CKSS27);
-  if (cachedData) {
-    try {
-      const items = JSON.parse(cachedData);
-      globalRawDataset = items;
-      populatePlatformFilter(items);
-      render(items);
-    } catch (e) {
-      console.error("Cache parse error", e);
-    }
-  } else if(linglingCont && linglingCont.innerHTML === "") {
-    linglingCont.innerHTML = `
-      <div class="empty-state">
-        <div class="spinner"></div>
-        <h3>Loading Campaign Data...</h3>
-        <p>Loading.....</p>
-      </div>
-    `;
-  }
-
-  fetch(API_URL + "?v=" + Date.now())
-  .then(res => res.json())
-  .then(data => {
-    const items = Array.isArray(data) ? data : (data.items || data.posts || data.captions || data.data || []);
+    const linglingCont = document.getElementById("linglingContent");
+    const brandCont = document.getElementById("brandContent");
+    const mediaCont = document.getElementById("mediaContent");
+    const cachedData = localStorage.getItem(CACHE_KEY_CKSS27);
     
-    globalRawDataset = items;
-    localStorage.setItem(CACHE_KEY_CKSS27, JSON.stringify(items));
-    populatePlatformFilter(items);
-    render(items);
-  })
-  .catch(err => {
-    console.error("Error loading data-ckss27.json:", err);
-    if(!cachedData && linglingCont) {
-      linglingCont.innerHTML = `
-        <div class="empty-state">
-          <h3>Awaiting Data Connection</h3>
-          <p>No Found Data</p>
-        </div>
-      `;
-    }
-    if(!cachedData) {
-      if(brandCont) brandCont.innerHTML = "";
-      if(mediaCont) mediaCont.innerHTML = "";
-    }
-  });
+    if (cachedData) {
+        try {
+            const items = JSON.parse(cachedData);
+            globalRawDataset = items;
+            populatePlatformFilter(items);
+            render(items);
+        } catch (e) {
+            console.error("Cache parse error", e);
+        }
+    } else if(linglingCont && linglingCont.innerHTML === "") {
+        linglingCont.innerHTML = `
+            <div class="empty-state">
+                <div class="spinner"></div>
+                <h3>Loading Campaign Data...</h3>
+                <p>Loading.....</p>
+            </div>
+        `;
+    } 
+
+    // เปลี่ยนจาก API_URL มาใช้ URL_CKSS27 ที่คุณกำหนดไว้ด้านบนสุดของไฟล์แทน
+    fetch(URL_CKSS27 + "?v=" + Date.now())
+        .then(res => res.json())
+        .then(data => {
+            const items = Array.isArray(data) ? data : (data.items || data.posts || data.captions || data.data || []);
+            globalRawDataset = items;
+            localStorage.setItem(CACHE_KEY_CKSS27, JSON.stringify(items));
+            populatePlatformFilter(items);
+            render(items);
+        })
+        .catch(err => {
+            console.error("Error loading data from Google Sheets:", err);
+            if(!cachedData && linglingCont) {
+                linglingCont.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Awaiting Data Connection</h3>
+                        <p>No Found Data</p>
+                    </div>
+                `;
+            }
+            if(!cachedData) {
+                if(brandCont) brandCont.innerHTML = "";
+                if(mediaCont) mediaCont.innerHTML = "";
+            }
+        });
 }
 
 function populatePlatformFilter(data){
