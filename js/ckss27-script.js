@@ -210,6 +210,16 @@ function loadData(){
         .then(data => {
             const items = Array.isArray(data) ? data : (data.items || data.posts || data.captions || data.data || []);
             globalRawDataset = items;
+            // ---- [เพิ่มตรงนี้] นำเวลาที่ดึงมาจาก API (Google Sheet) ไปแสดงผลที่หน้าจอ ----
+            if (data.lastUpdated) {
+                const timeEl = document.getElementById("lastUpdatedTime");
+                if (timeEl) {
+                    timeEl.innerText = data.lastUpdated;
+                }
+            }
+            // -------------------------------------------------------------------
+
+          
             localStorage.setItem(CACHE_KEY_CKSS27, JSON.stringify(items));
             populatePlatformFilter(items);
             render(items);
